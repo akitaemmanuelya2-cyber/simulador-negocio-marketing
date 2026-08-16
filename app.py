@@ -681,187 +681,186 @@ st.divider()
 
 
     # ========================================================
-    # SIMULACIÓN
-    # ========================================================
+# SIMULACIÓN
+# ========================================================
 
-    try:
-
-        (
-            ventas_historicas,
-            ganancia_historica,
-            ventas_simuladas,
-            ganancia_simulada
-        ) = simular_escenario_negocio(
-            df,
-            cambio_precio,
-            presupuesto_marketing,
-            cantidad_promedio=cantidad_promedio,
-            costo_porcentaje=costo_porcentaje
-        )
-
-    except ValueError as error:
-
-        st.error(
-            str(error)
-        )
-
-        st.stop()
-
-
-    # ========================================================
-    # RESULTADOS
-    # ========================================================
-
-    st.header(
-        "3. Resultados"
-    )
-
-    diferencia_ventas = (
-        ventas_simuladas
-        - ventas_historicas
-    )
-
-    diferencia_ganancia = (
-        ganancia_simulada
-        - ganancia_historica
-    )
-
-    col1, col2, col3, col4 = (
-        st.columns(4)
-    )
-
-    with col1:
-
-        st.metric(
-    "Ventas históricas",
-    formatear_dinero(ventas_historicas)
-       )
-
-    with col2:
-
-        st.metric(
-    "Ventas simuladas",
-    formatear_dinero(ventas_simuladas),
-    formatear_dinero(diferencia_ventas)
-)
-
-    with col3:
-
-        st.metric(
-    "Ganancia histórica",
-    formatear_dinero(ganancia_historica)
-)
-
-    with col4:
-
-        st.metric(
-    "Ganancia simulada",
-    formatear_dinero(ganancia_simulada),
-    formatear_dinero(diferencia_ganancia)
-)
-
-    # ========================================================
-    # RECOMENDACIÓN DE MARKETING
-    # ========================================================
-
-    st.header(
-        "4. Recomendación de inversión en marketing"
-    )
+try:
 
     (
-        inversion_instagram,
-        inversion_facebook,
-        inversion_tiktok,
-        inversion_google,
-        clientes_nuevos
-    ) = optimizar_marketing(
-        presupuesto_marketing
+        ventas_historicas,
+        ganancia_historica,
+        ventas_simuladas,
+        ganancia_simulada
+    ) = simular_escenario_negocio(
+        df,
+        cambio_precio,
+        presupuesto_marketing,
+        cantidad_promedio=cantidad_promedio,
+        costo_porcentaje=costo_porcentaje
     )
 
-    col1, col2 = st.columns(
-        [2, 1]
+except ValueError as error:
+
+    st.error(
+        str(error)
     )
 
-    with col1:
-
-        st.plotly_chart(
-            crear_grafico_marketing(
-                inversion_instagram,
-                inversion_facebook,
-                inversion_tiktok,
-                inversion_google
-            ),
-            use_container_width=True
-        )
-
-    with col2:
-
-        st.metric(
-            "Clientes nuevos estimados",
-            f"{clientes_nuevos:,}"
-        )
-
-        st.write(
-            "### Distribución recomendada"
-        )
-
-        st.write(
-            f"📸 Instagram: "
-            f"**${inversion_instagram:,.2f}**"
-        )
-
-        st.write(
-            f"📘 Facebook: "
-            f"**${inversion_facebook:,.2f}**"
-        )
-
-        st.write(
-            f"🎵 TikTok: "
-            f"**${inversion_tiktok:,.2f}**"
-        )
-
-        st.write(
-            f"🔎 Google Ads: "
-            f"**${inversion_google:,.2f}**"
-        )
+    st.stop()
 
 
-    # ========================================================
-    # COMPARACIÓN FINANCIERA
-    # ========================================================
+# ========================================================
+# RESULTADOS
+# ========================================================
 
-    st.header(
-        "5. Impacto financiero"
+st.header(
+    "3. Resultados"
+)
+
+diferencia_ventas = (
+    ventas_simuladas
+    - ventas_historicas
+)
+
+diferencia_ganancia = (
+    ganancia_simulada
+    - ganancia_historica
+)
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+
+    st.metric(
+        "Ventas históricas",
+        formatear_dinero(ventas_historicas)
     )
+
+with col2:
+
+    st.metric(
+        "Ventas simuladas",
+        formatear_dinero(ventas_simuladas),
+        formatear_dinero(diferencia_ventas)
+    )
+
+with col3:
+
+    st.metric(
+        "Ganancia histórica",
+        formatear_dinero(ganancia_historica)
+    )
+
+with col4:
+
+    st.metric(
+        "Ganancia simulada",
+        formatear_dinero(ganancia_simulada),
+        formatear_dinero(diferencia_ganancia)
+    )
+
+
+# ========================================================
+# RECOMENDACIÓN DE MARKETING
+# ========================================================
+
+st.header(
+    "4. Recomendación de inversión en marketing"
+)
+
+(
+    inversion_instagram,
+    inversion_facebook,
+    inversion_tiktok,
+    inversion_google,
+    clientes_nuevos
+) = optimizar_marketing(
+    presupuesto_marketing
+)
+
+col1, col2 = st.columns(
+    [2, 1]
+)
+
+with col1:
 
     st.plotly_chart(
-        crear_grafico_comparacion(
-            ventas_historicas,
-            ganancia_historica,
-            ventas_simuladas,
-            ganancia_simulada
+        crear_grafico_marketing(
+            inversion_instagram,
+            inversion_facebook,
+            inversion_tiktok,
+            inversion_google
         ),
         use_container_width=True
     )
 
+with col2:
 
-    # ========================================================
-    # DATOS UTILIZADOS
-    # ========================================================
-
-    with st.expander(
-        "Ver datos utilizados en el análisis"
-    ):
-
-        st.dataframe(
-            df.head(100),
-            use_container_width=True
-        )
-
-    st.caption(
-        "Nota: las recomendaciones de marketing "
-        "utilizan los supuestos de ROI, distribución "
-        "del presupuesto y CAC definidos en el "
-        "prototipo original. Son estimaciones, "
-        "no resultados garantizados."
+    st.metric(
+        "Clientes nuevos estimados",
+        f"{clientes_nuevos:,}"
     )
+
+    st.write(
+        "### Distribución recomendada"
+    )
+
+    st.write(
+        f"📸 Instagram: "
+        f"**${inversion_instagram:,.2f}**"
+    )
+
+    st.write(
+        f"📘 Facebook: "
+        f"**${inversion_facebook:,.2f}**"
+    )
+
+    st.write(
+        f"🎵 TikTok: "
+        f"**${inversion_tiktok:,.2f}**"
+    )
+
+    st.write(
+        f"🔎 Google Ads: "
+        f"**${inversion_google:,.2f}**"
+    )
+
+
+# ========================================================
+# COMPARACIÓN FINANCIERA
+# ========================================================
+
+st.header(
+    "5. Impacto financiero"
+)
+
+st.plotly_chart(
+    crear_grafico_comparacion(
+        ventas_historicas,
+        ganancia_historica,
+        ventas_simuladas,
+        ganancia_simulada
+    ),
+    use_container_width=True
+)
+
+
+# ========================================================
+# DATOS UTILIZADOS
+# ========================================================
+
+with st.expander(
+    "Ver datos utilizados en el análisis"
+):
+
+    st.dataframe(
+        df.head(100),
+        use_container_width=True
+    )
+
+st.caption(
+    "Nota: las recomendaciones de marketing "
+    "utilizan los supuestos de ROI, distribución "
+    "del presupuesto y CAC definidos en el "
+    "prototipo original. Son estimaciones, "
+    "no resultados garantizados."
+)
