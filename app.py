@@ -628,7 +628,7 @@ if df is not None:
 
     col1, col2, col3 = st.columns(3)
 
-   with col1:
+with col1:
 
     precio_actual = st.number_input(
         "Precio actual",
@@ -654,30 +654,30 @@ if df is not None:
     else:
         cambio_precio = 0.0
 
-    with col2:
+with col2:
 
-        presupuesto_marketing = st.number_input(
-            "Presupuesto de marketing",
-            min_value=0.0,
-            value=50.0,
-            step=10.0
+    presupuesto_marketing = st.number_input(
+        "Presupuesto de marketing",
+        min_value=0.0,
+        value=50.0,
+        step=10.0
+    )
+
+with col3:
+
+    costo_porcentaje = st.number_input(
+        "Costo del proveedor (%)",
+        min_value=0.0,
+        max_value=100.0,
+        value=70.0,
+        step=1.0,
+        help=(
+            "Porcentaje de las ventas "
+            "destinado al costo del proveedor."
         )
+    )
 
-    with col3:
-
-        costo_porcentaje = st.number_input(
-            "Costo del proveedor (%)",
-            min_value=0.0,
-            max_value=100.0,
-            value=70.0,
-            step=1.0,
-            help=(
-                "Porcentaje de las ventas "
-                "destinado al costo del proveedor."
-            )
-        )
-
-    st.divider()
+st.divider()
 
 
     # ========================================================
