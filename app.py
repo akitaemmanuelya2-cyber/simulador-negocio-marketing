@@ -744,10 +744,10 @@ if df is not None:
     with col4:
 
         st.metric(
-            "Ganancia simulada",
-            f"${ganancia_simulada:,.2f}",
-            f"${diferencia_ganancia:,.2f}"
-        )
+    "Ganancia simulada",
+    formatear_dinero(ganancia_simulada),
+    f"${diferencia_ganancia:,.2f}"
+)
 
 
     # ========================================================
