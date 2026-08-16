@@ -653,6 +653,9 @@ with col1:
         ) * 100
     else:
         cambio_precio = 0.0
+        st.caption(
+    f"Cambio de precio: {cambio_precio:+.1f}%"
+)
 
 with col2:
 
