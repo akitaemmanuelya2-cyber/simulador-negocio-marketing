@@ -306,6 +306,44 @@ def crear_grafico_comparacion(
 
 st.header("1. Ingresa los datos de tu negocio")
 
+# ============================================================
+# SELECCIÓN DE MONEDA
+# ============================================================
+
+monedas = {
+    "🇨🇴 COP - Peso colombiano": {
+        "codigo": "COP",
+        "simbolo": "$",
+        "decimales": 0
+    },
+    "🇺🇸 USD - Dólar estadounidense": {
+        "codigo": "USD",
+        "simbolo": "$",
+        "decimales": 2
+    },
+    "🇪🇺 EUR - Euro": {
+        "codigo": "EUR",
+        "simbolo": "€",
+        "decimales": 2
+    }
+}
+
+moneda_seleccionada = st.selectbox(
+    "¿En qué moneda quieres trabajar?",
+    list(monedas.keys())
+)
+
+moneda = monedas[moneda_seleccionada]
+
+codigo_moneda = moneda["codigo"]
+simbolo_moneda = moneda["simbolo"]
+decimales_moneda = moneda["decimales"]
+
+st.caption(
+    f"Todos los valores de esta simulación "
+    f"se mostrarán en {codigo_moneda}."
+)
+
 modo_datos = st.radio(
     "¿Cómo quieres trabajar?",
     [
