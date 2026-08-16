@@ -682,6 +682,18 @@ with col3:
         )
     )
 
+    costo_proveedor_estimado = (
+        ventas_historicas
+        * costo_porcentaje
+        / 100
+    )
+
+    st.caption(
+        f"Costo estimado: "
+        f"{formatear_dinero(costo_proveedor_estimado)} "
+        f"({costo_porcentaje:.1f}% de las ventas históricas)"
+    )
+
 st.divider()
 
 
