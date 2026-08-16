@@ -746,9 +746,8 @@ if df is not None:
         st.metric(
     "Ganancia simulada",
     formatear_dinero(ganancia_simulada),
-    f"${diferencia_ganancia:,.2f}"
+    formatear_dinero(diferencia_ganancia)
 )
-
 
     # ========================================================
     # RECOMENDACIÓN DE MARKETING
