@@ -661,10 +661,11 @@ with col1:
 with col2:
 
     presupuesto_marketing = st.number_input(
-        "Presupuesto de marketing",
+        f"Presupuesto de marketing ({moneda})",
         min_value=0.0,
-        value=50.0,
-        step=10.0
+        value=50000.0,
+        step=10000.0,
+        format="%.0f"
     )
 
 with col3:
