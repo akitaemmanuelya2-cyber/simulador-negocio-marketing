@@ -339,6 +339,12 @@ codigo_moneda = moneda["codigo"]
 simbolo_moneda = moneda["simbolo"]
 decimales_moneda = moneda["decimales"]
 
+def formatear_dinero(valor):
+    if decimales_moneda == 0:
+        return f"{simbolo_moneda} {valor:,.0f} {codigo_moneda}"
+    else:
+        return f"{simbolo_moneda} {valor:,.2f} {codigo_moneda}"
+
 st.caption(
     f"Todos los valores de esta simulación "
     f"se mostrarán en {codigo_moneda}."
