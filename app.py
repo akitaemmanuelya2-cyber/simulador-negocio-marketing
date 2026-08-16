@@ -661,7 +661,7 @@ with col1:
 with col2:
 
     presupuesto_marketing = st.number_input(
-        f"Presupuesto de marketing ({moneda})",
+        f"Presupuesto de marketing ({moneda['codigo']})",
         min_value=0.0,
         value=50000.0,
         step=10000.0,
