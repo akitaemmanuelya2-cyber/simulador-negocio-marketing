@@ -630,29 +630,29 @@ if df is not None:
 
     with col1:
 
-        precio_actual = st.number_input(
-    "Precio actual",
-    min_value=0.0,
-    value=50000.0,
-    step=1000.0,
-    format="%.0f"
-)
+    precio_actual = st.number_input(
+        "Precio actual",
+        min_value=0.0,
+        value=50000.0,
+        step=1000.0,
+        format="%.0f"
+    )
 
-nuevo_precio = st.number_input(
-    "Nuevo precio",
-    min_value=0.0,
-    value=52500.0,
-    step=1000.0,
-    format="%.0f"
-)
+    nuevo_precio = st.number_input(
+        "Nuevo precio",
+        min_value=0.0,
+        value=52500.0,
+        step=1000.0,
+        format="%.0f"
+    )
 
-if precio_actual > 0:
-    cambio_precio = (
-        (nuevo_precio - precio_actual)
-        / precio_actual
-    ) * 100
-else:
-    cambio_precio = 0.0
+    if precio_actual > 0:
+        cambio_precio = (
+            (nuevo_precio - precio_actual)
+            / precio_actual
+        ) * 100
+    else:
+        cambio_precio = 0.0
 
     with col2:
 
