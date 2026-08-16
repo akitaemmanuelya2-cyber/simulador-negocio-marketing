@@ -722,9 +722,9 @@ if df is not None:
     with col1:
 
         st.metric(
-            "Ventas históricas",
-            f"${ventas_historicas:,.2f}"
-        )
+    "Ventas históricas",
+    formatear_dinero(ventas_historicas)
+       )
 
     with col2:
 
