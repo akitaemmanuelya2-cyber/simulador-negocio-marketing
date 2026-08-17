@@ -618,7 +618,7 @@ if df is not None:
 
         # Mensaje dinámico con el gasto total del proveedor
         st.info(
-            f"📦 **Inversión en Proveedores:** "
+            f"📦 **Inversión en Proveedores o Elaboración:** "
             f"Antes: **{formatear_dinero(costos_historicos)}** ➔ "
             f"Despúes: **{formatear_dinero(costos_simulados)}**"
         )
