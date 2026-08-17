@@ -17,43 +17,35 @@ st.write(
 
 
 # ============================================================
-# FUNCIONES DEL MODELO
+# FUNCIONES DEL MODELO (CORREGIDAS Y SIMPLIFICADAS)
 # ============================================================
 
-def optimizar_marketing(presupuesto_total):
+def optimizar_marketing(presupuesto_total, precio_producto):
     """
-    Distribuye el presupuesto entre Instagram, Facebook,
-    TikTok y Google Ads.
-
-    Los porcentajes y ROI corresponden a los supuestos
-    del prototipo original.
+    Distribuye el presupuesto en redes y calcula cuántos 
+    clientes nuevos trae según el valor del producto.
     """
-
-    if presupuesto_total <= 0:
+    if presupuesto_total <= 0 or precio_producto <= 0:
         return 0, 0, 0, 0, 0
 
-    inversion_instagram = presupuesto_total * 0.40
-    inversion_facebook = presupuesto_total * 0.30
-    inversion_tiktok = presupuesto_total * 0.20
-    inversion_google = presupuesto_total * 0.10
+    # 1. Repartimos el dinero en canales
+    inversion_ig = presupuesto_total * 0.40  # 40% Instagram
+    inversion_fb = presupuesto_total * 0.30  # 30% Facebook
+    inversion_tk = presupuesto_total * 0.20  # 20% TikTok
+    inversion_gg = presupuesto_total * 0.10  # 10% Google
 
-    clientes_ig = (inversion_instagram * 3.5) / 4
-    clientes_fb = (inversion_facebook * 3.0) / 4
-    clientes_tk = (inversion_tiktok * 2.5) / 4
-    clientes_gg = (inversion_google * 2.0) / 4
+    # 2. Estimamos cuánto cuesta conseguir 1 cliente (CAC)
+    # Asumimos que traer 1 cliente cuesta el 20% del valor de tu producto (mínimo 1,000)
+    costo_por_cliente = max(precio_producto * 0.20, 1000.0)
 
-    total_clientes_nuevos = int(
-        clientes_ig
-        + clientes_fb
-        + clientes_tk
-        + clientes_gg
-    )
+    # 3. Clientes nuevos totales que trae la publicidad
+    total_clientes_nuevos = int(presupuesto_total / costo_por_cliente)
 
     return (
-        inversion_instagram,
-        inversion_facebook,
-        inversion_tiktok,
-        inversion_google,
+        inversion_ig,
+        inversion_fb,
+        inversion_tk,
+        inversion_gg,
         total_clientes_nuevos
     )
 
@@ -62,122 +54,46 @@ def simular_escenario_negocio(
     df_original,
     cambio_precio_porcentaje,
     presupuesto_marketing,
-    cantidad_promedio=None,
+    nuevo_precio_unitario,
     costo_porcentaje=70
 ):
     """
-    Calcula ventas y ganancias históricas y simuladas.
-
-    Si el CSV contiene Quantity, utiliza sus datos.
-    Si no contiene Quantity, utiliza el promedio
-    introducido por el usuario.
+    Calcula las ventas y ganancias reales basándose en unidades.
     """
-
     df_simulado = df_original.copy()
 
-    # 1. Calculamos el costo del proveedor
-    df_simulado["Costo_Proveedor"] = (
-        df_simulado["Sales"]
-        * (costo_porcentaje / 100)
+    # 1. Ventas e Ingresos Históricos
+    ventas_totales_historicas = df_simulado["Sales"].sum()
+    unidades_historicas_totales = df_simulado["Quantity"].sum()
+
+    # Costo histórico del proveedor
+    costos_historicos = ventas_totales_historicas * (costo_porcentaje / 100)
+    ganancia_total_historica = ventas_totales_historicas - costos_historicos
+
+    # 2. Impacto del Cambio de Precio en las ventas habituales (Elasticidad amigable)
+    # Si subes precio un 10%, la demanda de tus clientes habituales baja un 5% (factor -0.5)
+    cambio_demanda_porcentaje = (cambio_precio_porcentaje * -0.5) / 100
+    factor_demanda = max(0.0, 1 + cambio_demanda_porcentaje)
+
+    unidades_base_simuladas = unidades_historicas_totales * factor_demanda
+
+    # 3. Clientes extra por Marketing
+    _, _, _, _, clientes_nuevos_mkt = optimizar_marketing(
+        presupuesto_marketing, 
+        nuevo_precio_unitario
     )
 
-    # 2. Calculamos la ganancia neta histórica
-    df_simulado["Ganancia_Neta"] = (
-        df_simulado["Sales"]
-        - df_simulado["Costo_Proveedor"]
-    )
+    # 4. Total de unidades que vendemos en el futuro
+    unidades_totales_simuladas = unidades_base_simuladas + clientes_nuevos_mkt
 
-    # 3. Aplicamos el cambio de precio
-    factor_precio = 1 + (
-        cambio_precio_porcentaje / 100
-    )
+    # 5. Dinero final en el escenario simulado
+    ventas_totales_simuladas = unidades_totales_simuladas * nuevo_precio_unitario
+    costo_proveedor_simulado = ventas_totales_simuladas * (costo_porcentaje / 100)
 
-    df_simulado["Nuevas_Ventas"] = (
-        df_simulado["Sales"]
-        * factor_precio
-    )
-
-    # 4. Aplicamos la elasticidad
-    factor_cantidad = 1 - (
-        cambio_precio_porcentaje / 100 * 0.5
-    )
-
-    # Si Quantity existe, usamos los datos reales.
-    # Si no existe, usamos el promedio proporcionado.
-    if "Quantity" in df_simulado.columns:
-        df_simulado["Cantidad_Base"] = (
-            df_simulado["Quantity"]
-        )
-    else:
-        df_simulado["Cantidad_Base"] = (
-            cantidad_promedio
-        )
-
-    df_simulado["Nueva_Cantidad"] = (
-        df_simulado["Cantidad_Base"]
-        * factor_cantidad
-    )
-
-    # 5. Calculamos el impacto del marketing
-    (
-        _,
-        _,
-        _,
-        _,
-        clientes_nuevos
-    ) = optimizar_marketing(
-        presupuesto_marketing
-    )
-
-    unidades_extra_marketing = (
-        clientes_nuevos * 1.5
-    )
-
-    # 6. Métricas históricas
-    ventas_totales_historicas = (
-        df_simulado["Sales"].sum()
-    )
-
-    ganancia_total_historica = (
-        df_simulado["Ganancia_Neta"].sum()
-    )
-
-    # 7. Métricas proyectadas
-    promedio_cantidad = (
-        df_simulado["Cantidad_Base"].mean()
-    )
-
-    if promedio_cantidad <= 0:
-        raise ValueError(
-            "La cantidad promedio debe ser mayor que cero."
-        )
-
-    precio_promedio_unidad = (
-        df_simulado["Sales"].mean()
-        / promedio_cantidad
-    )
-
-    ventas_totales_simuladas = (
-        (
-            df_simulado["Nuevas_Ventas"]
-            * factor_cantidad
-        ).sum()
-        + (
-            unidades_extra_marketing
-            * precio_promedio_unidad
-        )
-    )
-
-    nuevos_costos_proveedor = (
-        df_simulado["Costo_Proveedor"]
-        * factor_cantidad
-    ).sum()
-
-    # Ganancia =
-    # Ventas - Costos - Publicidad
+    # Ganancia = Ventas - Costo del Producto - Dinero invertido en Publicidad
     ganancia_total_simulada = (
-        ventas_totales_simuladas
-        - nuevos_costos_proveedor
+        ventas_totales_simuladas 
+        - costo_proveedor_simulado 
         - presupuesto_marketing
     )
 
