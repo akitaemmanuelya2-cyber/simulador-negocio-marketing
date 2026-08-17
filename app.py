@@ -788,9 +788,9 @@ if df is not None:
 
     if ganancia_simulada > ganancia_historica:
         st.success(
-            f"🚀 **¡Escenario Positivo!** Con esta estrategia estás ganando "
-            f"**{formatear_dinero(ganancia_simulada - ganancia_historica)} adicionales**. "
-            f"Por cada $100 que inviertes en publicidad, recuperas tu inversión y te quedan **{roi_publicidad:.0f}% de retorno extra**."
+            f"🚀 **¡Escenario Positivo! Con esta estrategia estás ganando**"
+            f"**{formatear_dinero(ganancia_simulada - ganancia_historica)} adicionales**."
+            f"**Por cada $100 que inviertes en publicidad, recuperas tu inversión y te quedan {roi_publicidad:.0f}% de retorno extra**."
         )
     else:
         st.warning(
