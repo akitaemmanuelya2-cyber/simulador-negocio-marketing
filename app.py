@@ -624,10 +624,9 @@ if df is not None:
             df,
             cambio_precio,
             presupuesto_marketing,
-            cantidad_promedio=cantidad_promedio,
+            nuevo_precio_unitario=nuevo_precio,
             costo_porcentaje=costo_porcentaje
         )
-
     except ValueError as error:
 
         st.error(
