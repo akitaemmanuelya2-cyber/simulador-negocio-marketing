@@ -281,15 +281,9 @@ cantidad_promedio = None
 # ========================================================
     # CARGA Y PROCESAMIENTO DE CSV (CON COMPLETADO ASISTIDO)
     # ========================================================
-    # 1. Selector de modo (Pegado al margen izquierdo - 0 espacios)
-modo_trabajo = st.radio(
-    "¿Cómo quieres trabajar?",
-    ["Tengo una base de datos (CSV)", "No tengo una base de datos (CSV), quiero introducir estimaciones"]
-)
-
-# 2. Condicional principal (Pegado al margen izquierdo - 0 espacios)
+    # 1. Condicional principal 
 if modo_trabajo == "Tengo una base de datos (CSV)":
-    # A partir de aquí, TODO va con 4 espacios de sangría
+    
     archivo_subido = st.file_uploader("Sube tu archivo de ventas (.csv)", type=["csv"])
     
     if archivo_subido is not None:
