@@ -810,17 +810,53 @@ if df is not None:
         )
 
 # ========================================================
-# DATOS UTILIZADOS
-# ========================================================
+    # DETALLE DE DATOS UTILIZADOS EN EL ANÁLISIS
+    # ========================================================
+    with st.expander("🔍 Ver datos utilizados en el análisis"):
+        
+        # Caso 1: Modo estimaciones manuales
+        if modo_trabajo == "No tengo una base de datos (CSV), quiero introducir estimaciones":
+            
+            datos_resumen = {
+                "Métrica / Concepto": [
+                    "Unidades Vendidas (Históricas)",
+                    "Precio de Venta Actual",
+                    "Ventas Históricas Totales",
+                    "Nuevo Precio Propuesto",
+                    "Presupuesto de Publicidad",
+                    "Costo por Unidad / Proveedor"
+                ],
+                "Valor": [
+                    f"{unidades_vendidas:,} unidades",
+                    formatear_dinero(precio_actual).strip(),
+                    formatear_dinero(ventas_historicas).strip(),
+                    formatear_dinero(nuevo_precio).strip(),
+                    formatear_dinero(presupuesto_marketing).strip(),
+                    formatear_dinero(costo_proveedor).strip()
+                ]
+            }
+            
+            st.write("📌 **Resumen de los parámetros ingresados para la simulación:**")
+            st.table(datos_resumen)
 
-with st.expander(
-    "Ver datos utilizados en el análisis"
-):
-
-    st.dataframe(
-        df.head(100),
-        use_container_width=True
-    )
+        # Caso 2: Modo archivo CSV subido
+        else:
+            st.write("📊 **Muestra de la base de datos CSV analizada:**")
+            
+            # Renombramos temporalmente las columnas para que el usuario las lea en español
+            df_mostrar = df.copy()
+            
+            # Reemplaza 'Sales' y 'Quantity' por las columnas reales de tu DataFrame si difieren
+            columnas_espanol = {
+                "Sales": f"Ventas Totales ({codigo_moneda})",
+                "Quantity": "Unidades Vendidas",
+                "Price": f"Precio Unitario ({codigo_moneda})"
+            }
+            
+            df_mostrar = df_mostrar.rename(columns=columnas_espanol)
+            
+            # Ocultamos el índice numérico de pandas para mayor limpieza
+            st.dataframe(df_mostrar.head(10), use_container_width=True, hide_index=True)
 
 st.caption(
     "Nota: las recomendaciones de marketing "
