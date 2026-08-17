@@ -648,7 +648,7 @@ if df is not None:
     except Exception as error:
         st.error(f"Ocurrió un inconveniente al simular los datos: {error}")
 
-# ========================================================
+    # ========================================================
     # 4. RECOMENDACIÓN DE INVERSIÓN EN MARKETING
     # ========================================================
 
@@ -728,23 +728,75 @@ if df is not None:
     else:
         st.warning("⚠️ Ingresa un presupuesto de marketing mayor a $0 en la Sección 2 para ver la recomendación de inversión.")
 
-# ========================================================
-# COMPARACIÓN FINANCIERA
-# ========================================================
+    # ========================================================
+    # 5. IMPACTO FINANCIERO
+    # ========================================================
 
-st.header(
-    "5. Impacto financiero"
-)
+    st.header("5. Impacto financiero")
+    st.write("Comparativa visual entre tu situación actual y el escenario simulado:")
 
-st.plotly_chart(
-    crear_grafico_comparacion(
-        ventas_historicas,
-        ganancia_historica,
-        ventas_simuladas,
-        ganancia_simulada
-    ),
-    use_container_width=True
-)
+    col_fig1, col_fig2 = st.columns(2)
+
+    with col_fig1:
+        # Gráfico 1: Comparativa de Ventas
+        fig_ventas = go.Figure(data=[
+            go.Bar(
+                x=["Ventas Históricas", "Ventas Simuladas"],
+                y=[ventas_historicas, ventas_simuladas],
+                text=[formatear_dinero(ventas_historicas), formatear_dinero(ventas_simuladas)],
+                textposition="auto",
+                marker_color=["#4A5568", "#00C853"] # Gris actual vs Verde proyección
+            )
+        ])
+
+        fig_ventas.update_layout(
+            title="📈 Comparativa de Ventas Totales",
+            yaxis_title=codigo_moneda,
+            height=300,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="white")
+        )
+
+        st.plotly_chart(fig_ventas, use_container_width=True)
+
+    with col_fig2:
+        # Gráfico 2: Comparativa de Ganancia Neta
+        fig_ganancia = go.Figure(data=[
+            go.Bar(
+                x=["Ganancia Histórica", "Ganancia Simulada"],
+                y=[ganancia_historica, ganancia_simulada],
+                text=[formatear_dinero(ganancia_historica), formatear_dinero(ganancia_simulada)],
+                textposition="auto",
+                marker_color=["#4A5568", "#29B6F6"] # Gris actual vs Azul proyección
+            )
+        ])
+
+        fig_ganancia.update_layout(
+            title="💰 Comparativa de Ganancia Neta",
+            yaxis_title=codigo_moneda,
+            height=300,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="white")
+        )
+
+        st.plotly_chart(fig_ganancia, use_container_width=True)
+
+    # Mensaje de conclusión o veredicto del negocio
+    roi_publicidad = ((ganancia_simulada - ganancia_historica) / presupuesto_marketing * 100) if presupuesto_marketing > 0 else 0
+
+    if ganancia_simulada > ganancia_historica:
+        st.success(
+            f"🚀 **¡Escenario Positivo!** Con esta estrategia estás ganando "
+            f"**{formatear_dinero(ganancia_simulada - ganancia_historica)} adicionales**. "
+            f"Por cada $100 que inviertes en publicidad, recuperas tu inversión y te quedan **{roi_publicidad:.0f}% de retorno extra**."
+        )
+    else:
+        st.warning(
+            "⚠️ **Ojo con los números:** El aumento en costos o publicidad supera el margen generado. "
+            "Ajusta el precio o reduce el presupuesto de marketing para asegurar ganancias."
+        )
 
 
 # ========================================================
