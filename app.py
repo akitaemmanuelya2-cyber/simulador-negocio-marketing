@@ -713,6 +713,20 @@ if df is not None:
         st.stop()
 
 
+    costo_proveedor_estimado = (
+        ventas_historicas
+        * costo_porcentaje
+        / 100
+    )
+
+    st.caption(
+        f"Costo estimado del proveedor: "
+        f"{formatear_dinero(costo_proveedor_estimado)} "
+        f"({costo_porcentaje:.1f}% de las ventas históricas)"
+    )
+
+
+
 # ========================================================
 # RESULTADOS
 # ========================================================
