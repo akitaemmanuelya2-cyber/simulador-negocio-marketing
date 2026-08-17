@@ -784,13 +784,24 @@ if df is not None:
         st.plotly_chart(fig_ganancia, use_container_width=True)
 
     # Mensaje de conclusión o veredicto del negocio
-    roi_publicidad = ((ganancia_simulada - ganancia_historica) / presupuesto_marketing * 100) if presupuesto_marketing > 0 else 0
+    diferencia_ganancia = ganancia_simulada - ganancia_historica
+
+    if presupuesto_marketing > 0:
+        roi_porcentaje = (diferencia_ganancia / presupuesto_marketing) * 100
+        ganancia_por_cada_100 = (diferencia_ganancia / presupuesto_marketing) * 100
+    else:
+        roi_porcentaje = 0
+        ganancia_por_cada_100 = 0
+
+    texto_ganancia_extra = formatear_dinero(diferencia_ganancia).strip()
 
     if ganancia_simulada > ganancia_historica:
         st.success(
-            f"🚀 **¡Escenario Positivo! Con esta estrategia estás ganando**"
-            f"**{formatear_dinero(ganancia_simulada - ganancia_historica)} adicionales**."
-            f"**Por cada $100 que inviertes en publicidad, recuperas tu inversión y te quedan {roi_publicidad:.0f}% de retorno extra**."
+            f"🚀 **¡Escenario Positivo!** Con esta estrategia estás ganando "
+            f"**{texto_ganancia_extra} adicionales**. "
+            f"Por cada **$100 COP** que inviertes en publicidad, recuperas tu inversión y te quedan "
+            f"**${ganancia_por_cada_100:,.0f} COP** de ganancia limpia "
+            f"(un retorno del **{roi_porcentaje:.0f}%**)."
         )
     else:
         st.warning(
