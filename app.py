@@ -647,71 +647,58 @@ if df is not None:
     except Exception as error:
         st.error(f"Ocurrió un inconveniente al simular los datos: {error}")
 
-# ========================================================
-# RECOMENDACIÓN DE MARKETING
-# ========================================================
+    # ========================================================
+    # 4. RECOMENDACIÓN DE INVERSIÓN EN MARKETING
+    # ========================================================
 
-st.header(
-    "4. Recomendación de inversión en marketing"
-)
+    st.header("4. Recomendación de inversión en marketing")
 
-(
-    inversion_instagram,
-    inversion_facebook,
-    inversion_tiktok,
-    inversion_google,
-    clientes_nuevos
-) = optimizar_marketing(
-    presupuesto_marketing,
-    nuevo_precio
-)
+    # 1. Calculamos la distribución sugerida usando el presupuesto de la Sección 2
+    (
+        inversion_ig,
+        inversion_fb,
+        inversion_tk,
+        inversion_gg,
+        clientes_nuevos
+    ) = optimizar_marketing(presupuesto_marketing, nuevo_precio)
 
-col1, col2 = st.columns(
-    [2, 1]
-)
+    if presupuesto_marketing > 0:
+        st.write(
+            f"Basado en un presupuesto de **{formatear_dinero(presupuesto_marketing)}**, "
+            f"esta es la distribución óptima sugerida para tus campañas:"
+        )
 
-with col1:
+        col_mkt1, col_mkt2 = st.columns([2, 1])
 
-    st.plotly_chart(
-        crear_grafico_marketing(
-            inversion_instagram,
-            inversion_facebook,
-            inversion_tiktok,
-            inversion_google
-        ),
-        use_container_width=True
-    )
+        with col_mkt1:
+            # Creamos una tabla clara con la recomendación por canal
+            datos_canales = {
+                "Canal / Red Social": ["Instagram Ads", "Facebook Ads", "TikTok Ads", "Google Search"],
+                "Inversión Sugerida": [
+                    formatear_dinero(inversion_ig),
+                    formatear_dinero(inversion_fb),
+                    formatear_dinero(inversion_tk),
+                    formatear_dinero(inversion_gg)
+                ],
+                "Participación": ["40%", "30%", "20%", "10%"]
+            }
+            st.table(datos_canales)
 
-with col2:
+        with col_mkt2:
+            st.metric(
+                label="🎯 Clientes nuevos estimados",
+                value=f"+{clientes_nuevos}",
+                help="Proyección de personas adicionales que te comprarán gracias a la publicidad."
+            )
+            
+            # Un pequeño consejo dinámico y amigable
+            st.success(
+                f"💡 **Tip rápido:** Cada nuevo cliente te cuesta en promedio "
+                f"**{formatear_dinero(presupuesto_marketing / clientes_nuevos if clientes_nuevos > 0 else 0)}** en publicidad."
+            )
 
-    st.metric(
-        "Clientes nuevos estimados",
-        f"{clientes_nuevos:,}"
-    )
-
-    st.write(
-        "### Distribución recomendada"
-    )
-
-    st.write(
-        f"📸 Instagram: "
-        f"**${inversion_instagram:,.2f}**"
-    )
-
-    st.write(
-        f"📘 Facebook: "
-        f"**${inversion_facebook:,.2f}**"
-    )
-
-    st.write(
-        f"🎵 TikTok: "
-        f"**${inversion_tiktok:,.2f}**"
-    )
-
-    st.write(
-        f"🔎 Google Ads: "
-        f"**${inversion_google:,.2f}**"
-    )
+    else:
+        st.warning("⚠️ Ingresa un presupuesto de marketing mayor a $0 en la Sección 2 para ver la recomendación de inversión.")
 
 
 # ========================================================
