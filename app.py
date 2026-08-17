@@ -281,61 +281,65 @@ cantidad_promedio = None
 # ========================================================
     # CARGA Y PROCESAMIENTO DE CSV (CON COMPLETADO ASISTIDO)
     # ========================================================
-    if modo_trabajo == "Tengo una base de datos (CSV)":
-        # 1. Carga del archivo CSV
-        archivo_subido = st.file_uploader("Sube tu archivo de ventas (.csv)", type=["csv"])
-        
-        if archivo_subido is not None:
-            try:
-                df = pd.read_csv(archivo_subido)
+    if # 1. Selector de modo (Pegado al margen izquierdo - 0 espacios)
+modo_trabajo = st.radio(
+    "¿Cómo quieres trabajar?",
+    ["Tengo una base de datos (CSV)", "No tengo una base de datos (CSV), quiero introducir estimaciones"]
+)
+
+# 2. Condicional principal (Pegado al margen izquierdo - 0 espacios)
+if modo_trabajo == "Tengo una base de datos (CSV)":
+    # A partir de aquí, TODO va con 4 espacios de sangría
+    archivo_subido = st.file_uploader("Sube tu archivo de ventas (.csv)", type=["csv"])
+    
+    if archivo_subido is not None:
+        try:
+            df = pd.read_csv(archivo_subido)
+            
+            # Normalización automática de columnas
+            mapeo_columnas = {
+                "ventas": "Sales", "Ventas": "Sales", "monto": "Sales", "Monto": "Sales", 
+                "total": "Sales", "Total": "Sales", "precio": "Sales", "Price": "Sales",
+                "cantidad": "Quantity", "Cantidad": "Quantity", "unidades": "Quantity", "Units": "Quantity"
+            }
+            df = df.rename(columns=mapeo_columnas)
+            
+            if "Sales" not in df.columns:
+                st.error("⚠️ El archivo debe contener al menos una columna de ventas o montos (ej. 'Sales', 'Ventas', 'Total').")
+            else:
+                st.success(f"✅ ¡Base de datos cargada correctamente! ({len(df)} registros encontrados)")
                 
-                # Normalización automática de nombres de columnas
-                mapeo_columnas = {
-                    "ventas": "Sales", "Ventas": "Sales", "monto": "Sales", "Monto": "Sales", 
-                    "total": "Sales", "Total": "Sales", "precio": "Sales", "Price": "Sales",
-                    "cantidad": "Quantity", "Cantidad": "Quantity", "unidades": "Quantity", "Units": "Quantity"
-                }
-                df = df.rename(columns=mapeo_columnas)
+                col_inp1, col_inp2 = st.columns(2)
                 
-                # Validación de la columna indispensable de ventas
-                if "Sales" not in df.columns:
-                    st.error("⚠️ El archivo debe contener al menos una columna de ventas o montos (ej. 'Sales', 'Ventas', 'Total').")
-                else:
-                    st.success(f"✅ ¡Base de datos cargada correctamente! ({len(df)} registros encontrados)")
-                    
-                    # Completado asistido para columnas faltantes
-                    col_inp1, col_inp2 = st.columns(2)
-                    
-                    if "Quantity" not in df.columns:
-                        with col_inp1:
-                            cant_est = st.number_input(
-                                "📦 Cantidad promedio por venta/registro:",
-                                min_value=1.0,
-                                value=1.0,
-                                step=0.5,
-                                help="Establece las unidades promedio vendidas por cada fila del CSV."
-                            )
-                            df["Quantity"] = cant_est
+                if "Quantity" not in df.columns:
+                    with col_inp1:
+                        cant_est = st.number_input(
+                            "📦 Cantidad promedio por venta/registro:",
+                            min_value=1.0,
+                            value=1.0,
+                            step=0.5,
+                            help="Establece las unidades promedio vendidas por cada fila del CSV."
+                        )
+                        df["Quantity"] = cant_est
 
-                    if "Cost" not in df.columns:
-                        with col_inp2:
-                            costo_est = st.number_input(
-                                f"🏭 Costo unitario estimado de elaboración/proveedor ({codigo_moneda}):",
-                                min_value=0.0,
-                                value=0.0,
-                                step=1000.0,
-                                help="Costo de producción o compra por cada unidad."
-                            )
-                            df["Cost"] = costo_est
+                if "Cost" not in df.columns:
+                    with col_inp2:
+                        costo_est = st.number_input(
+                            f"🏭 Costo unitario estimado de elaboración/proveedor ({codigo_moneda}):",
+                            min_value=0.0,
+                            value=0.0,
+                            step=1000.0,
+                            help="Costo de producción o compra por cada unidad."
+                        )
+                        df["Cost"] = costo_est
 
-                    # Métricas principales
-                    ventas_historicas = df["Sales"].sum()
-                    unidades_totales = df["Quantity"].sum()
-                    precio_actual = ventas_historicas / unidades_totales if unidades_totales > 0 else 0
+                # Métricas principales
+                ventas_historicas = df["Sales"].sum()
+                unidades_totales = df["Quantity"].sum()
+                precio_actual = ventas_historicas / unidades_totales if unidades_totales > 0 else 0
 
-            except Exception as e:
-                st.error(f"Error al leer el archivo CSV: {e}")
-
+        except Exception as e:
+            st.error(f"Error al leer el archivo CSV: {e}")
 
 # ============================================================
 # OPCIÓN B: USUARIO SIN CSV
