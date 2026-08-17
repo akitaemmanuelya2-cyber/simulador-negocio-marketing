@@ -799,7 +799,7 @@ if df is not None:
     if ganancia_simulada > ganancia_historica:
         st.success(
             f"🚀 **¡Escenario Positivo!** "
-            f"Al invertir **{texto_presupuesto}**, obtienes **{texto_ganancia_extra}** de ganancia limpia adicional. "
+            f"**Al invertir {texto_presupuesto}**, obtienes **{texto_ganancia_extra}** de ganancia limpia adicional. "
             f"Esto significa que por cada **1 {codigo_moneda}** que inviertes en anuncios, te quedan **{ganancia_por_unidad}** libres "
             f"(multiplicas tu inversión **{multiplicador:.1f} veces**)."
         )
