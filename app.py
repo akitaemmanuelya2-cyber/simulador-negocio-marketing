@@ -814,9 +814,21 @@ if df is not None:
     # ========================================================
     with st.expander("🔍 Ver datos utilizados en el análisis"):
         
-        # Caso 1: Modo estimaciones manuales
-        if modo_trabajo == "No tengo una base de datos (CSV), quiero introducir estimaciones":
+        # Validamos si existe un DataFrame 'df' activo con datos
+        if 'df' in locals() and df is not None and not df.empty:
+            st.write("📊 **Muestra de la base de datos CSV analizada:**")
             
+            df_mostrar = df.copy()
+            columnas_espanol = {
+                "Sales": f"Ventas Totales ({codigo_moneda})",
+                "Quantity": "Unidades Vendidas",
+                "Price": f"Precio Unitario ({codigo_moneda})"
+            }
+            df_mostrar = df_mostrar.rename(columns=columnas_espanol)
+            st.dataframe(df_mostrar.head(10), use_container_width=True, hide_index=True)
+
+        else:
+            # Si no hay archivo CSV, mostramos la tabla de estimaciones manuales
             datos_resumen = {
                 "Métrica / Concepto": [
                     "Unidades Vendidas (Históricas)",
@@ -838,25 +850,6 @@ if df is not None:
             
             st.write("📌 **Resumen de los parámetros ingresados para la simulación:**")
             st.table(datos_resumen)
-
-        # Caso 2: Modo archivo CSV subido
-        else:
-            st.write("📊 **Muestra de la base de datos CSV analizada:**")
-            
-            # Renombramos temporalmente las columnas para que el usuario las lea en español
-            df_mostrar = df.copy()
-            
-            # Reemplaza 'Sales' y 'Quantity' por las columnas reales de tu DataFrame si difieren
-            columnas_espanol = {
-                "Sales": f"Ventas Totales ({codigo_moneda})",
-                "Quantity": "Unidades Vendidas",
-                "Price": f"Precio Unitario ({codigo_moneda})"
-            }
-            
-            df_mostrar = df_mostrar.rename(columns=columnas_espanol)
-            
-            # Ocultamos el índice numérico de pandas para mayor limpieza
-            st.dataframe(df_mostrar.head(10), use_container_width=True, hide_index=True)
 
 st.caption(
     "Nota: las recomendaciones de marketing "
