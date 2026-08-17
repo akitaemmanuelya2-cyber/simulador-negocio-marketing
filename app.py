@@ -269,7 +269,7 @@ modo_datos = st.radio(
     "¿Cómo quieres trabajar?",
     [
         "Tengo un CSV",
-        "No tengo un CSV, quiero introducir estimaciones"
+        "No tengo una base de datos (CSV), quiero introducir estimaciones"
     ],
     horizontal=True
 )
@@ -282,7 +282,7 @@ cantidad_promedio = None
 # OPCIÓN A: USUARIO CON CSV
 # ============================================================
 
-if modo_datos == "Tengo un CSV":
+if modo_datos == "Tengo una base de datos (CSV)":
 
     archivo = st.file_uploader(
         "Sube tu archivo CSV",
@@ -404,7 +404,7 @@ if modo_datos == "Tengo un CSV":
 # ============================================================
 else:
     st.info(
-        "¿No tienes un CSV? No pasa nada. "
+        "¿No tienes una base de datos? No pasa nada. "
         "Ingresa los datos generales de tu negocio y calculamos el resto. 💡"
     )
 
@@ -651,7 +651,7 @@ if df is not None:
     # 4. RECOMENDACIÓN DE INVERSIÓN EN MARKETING
     # ========================================================
 
-    st.header("4. Recomendación de inversión en marketing")
+    st.header("4. Recomendación de inversión en publicidad o marketing")
 
     # 1. Calculamos la distribución sugerida
     (
