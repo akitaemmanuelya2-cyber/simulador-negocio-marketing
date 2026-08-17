@@ -412,7 +412,7 @@ else:
 
     with col_man1:
         unidades_vendidas = st.number_input(
-            "Cantidad de productos o unidades vendidos.",
+            "Cantidad de productos o unidades vendidas.",
             min_value=1,
             value=80,
             step=1,
@@ -574,11 +574,12 @@ if df is not None:
 
     with col2:
         presupuesto_marketing = st.number_input(
-            f"Presupuesto de marketing ({codigo_moneda})",
+            f"Presupuesto para publicidad o marketing ({codigo_moneda})",
             min_value=0.0,
             value=50000.0,
             step=10000.0,
             format="%.0f"
+            help="¿Cuánto quiero invertir en publicidad?"
         )
 
     with col3:
