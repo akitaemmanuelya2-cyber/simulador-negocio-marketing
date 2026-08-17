@@ -265,7 +265,7 @@ st.caption(
     f"se mostrarán en {codigo_moneda}."
 )
 
-modo_datos = st.radio(
+modo_trabajo = st.radio(
     "¿Cómo quieres trabajar?",
     [
         "Tengo una base de datos (CSV)",
