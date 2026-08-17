@@ -55,10 +55,10 @@ def simular_escenario_negocio(
     cambio_precio_porcentaje,
     presupuesto_marketing,
     nuevo_precio_unitario,
-    costo_porcentaje=70
+    costo_unitario
 ):
     """
-    Calcula las ventas y ganancias reales basándose en unidades.
+    Calcula las ventas y ganancias reales basándose en el costo unitario en moneda real.
     """
     df_simulado = df_original.copy()
 
@@ -66,15 +66,13 @@ def simular_escenario_negocio(
     ventas_totales_historicas = df_simulado["Sales"].sum()
     unidades_historicas_totales = df_simulado["Quantity"].sum()
 
-    # Costo histórico del proveedor
-    costos_historicos = ventas_totales_historicas * (costo_porcentaje / 100)
+    # Costo total histórico del proveedor
+    costos_historicos = unidades_historicas_totales * costo_unitario
     ganancia_total_historica = ventas_totales_historicas - costos_historicos
 
-    # 2. Impacto del Cambio de Precio en las ventas habituales (Elasticidad amigable)
-    # Si subes precio un 10%, la demanda de tus clientes habituales baja un 5% (factor -0.5)
+    # 2. Impacto del Cambio de Precio
     cambio_demanda_porcentaje = (cambio_precio_porcentaje * -0.5) / 100
     factor_demanda = max(0.0, 1 + cambio_demanda_porcentaje)
-
     unidades_base_simuladas = unidades_historicas_totales * factor_demanda
 
     # 3. Clientes extra por Marketing
@@ -83,14 +81,14 @@ def simular_escenario_negocio(
         nuevo_precio_unitario
     )
 
-    # 4. Total de unidades que vendemos en el futuro
+    # 4. Total de unidades simuladas
     unidades_totales_simuladas = unidades_base_simuladas + clientes_nuevos_mkt
 
-    # 5. Dinero final en el escenario simulado
+    # 5. Métricas proyectadas
     ventas_totales_simuladas = unidades_totales_simuladas * nuevo_precio_unitario
-    costo_proveedor_simulado = ventas_totales_simuladas * (costo_porcentaje / 100)
+    costo_proveedor_simulado = unidades_totales_simuladas * costo_unitario
 
-    # Ganancia = Ventas - Costo del Producto - Dinero invertido en Publicidad
+    # Ganancia = Ventas - Costo de Fabricación/Proveedor - Publicidad
     ganancia_total_simulada = (
         ventas_totales_simuladas 
         - costo_proveedor_simulado 
@@ -101,9 +99,10 @@ def simular_escenario_negocio(
         ventas_totales_historicas,
         ganancia_total_historica,
         ventas_totales_simuladas,
-        ganancia_total_simulada
+        ganancia_total_simulada,
+        costos_historicos,
+        costo_proveedor_simulado
     )
-
 
 # ============================================================
 # GRÁFICO DE MARKETING
