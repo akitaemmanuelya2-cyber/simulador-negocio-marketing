@@ -278,125 +278,63 @@ df = None
 cantidad_promedio = None
 
 
-# ============================================================
-# OPCIÓN A: USUARIO CON CSV
-# ============================================================
-
-if modo_datos == "Tengo una base de datos (CSV)":
-
-    archivo = st.file_uploader(
-        "Sube tu archivo CSV",
-        type=["csv"],
-        help=(
-            "El archivo debe contener una columna "
-            "de ventas. Quantity es opcional."
-        )
-    )
-
-    if archivo is not None:
-
+    # ========================================================
+    # CARGA Y PROCESAMIENTO DE CSV (CON COMPLETADO ASISTIDO)
+    # ========================================================
+    archivo_subido = st.file_uploader("Sube tu archivo de ventas (.csv)", type=["csv"])
+    
+    if archivo_subido is not None:
         try:
-
-            df = pd.read_csv(archivo)
-
-            st.success(
-                f"Archivo cargado correctamente: "
-                f"{len(df):,} registros."
-            )
-
-            st.subheader("Columnas encontradas")
-
-            st.write(
-                df.columns.tolist()
-            )
-
-            # Buscamos Sales de forma flexible
-            columna_sales = next(
-                (
-                    col
-                    for col in df.columns
-                    if str(col).strip().lower()
-                    == "sales"
-                ),
-                None
-            )
-
-            if columna_sales is None:
-
-                st.error(
-                    "No encontramos una columna llamada "
-                    "'Sales'. Por ahora necesitamos una "
-                    "columna de ventas."
-                )
-
-                df = None
-
+            df = pd.read_csv(archivo_subido)
+            
+            # 1. Normalización automática de nombres de columnas
+            mapeo_columnas = {
+                "ventas": "Sales", "Ventas": "Sales", "monto": "Sales", "Monto": "Sales", 
+                "total": "Sales", "Total": "Sales", "precio": "Sales", "Price": "Sales",
+                "cantidad": "Quantity", "Cantidad": "Quantity", "unidades": "Quantity", "Units": "Quantity"
+            }
+            df = df.rename(columns=mapeo_columnas)
+            
+            # 2. Validación de la columna indispensable de ventas
+            if "Sales" not in df.columns:
+                st.error("⚠️ El archivo debe contener al menos una columna de ventas o montos (ej. 'Sales', 'Ventas', 'Total').")
             else:
-
-                if columna_sales != "Sales":
-
-                    df = df.rename(
-                        columns={
-                            columna_sales: "Sales"
-                        }
-                    )
-
-                # Buscamos Quantity
-                columna_quantity = next(
-                    (
-                        col
-                        for col in df.columns
-                        if str(col).strip().lower()
-                        == "quantity"
-                    ),
-                    None
-                )
-
-                if columna_quantity is not None:
-
-                    if columna_quantity != "Quantity":
-
-                        df = df.rename(
-                            columns={
-                                columna_quantity: "Quantity"
-                            }
+                st.success(f"✅ ¡Base de datos cargada correctamente! ({len(df)} registros encontrados)")
+                
+                # 3. Completado asistido para columnas faltantes en CSVs básicos
+                col_inp1, col_inp2 = st.columns(2)
+                
+                # A) Si no existe la columna de cantidades en el CSV
+                if "Quantity" not in df.columns:
+                    with col_inp1:
+                        cant_est = st.number_input(
+                            "📦 Cantidad promedio por venta/registro:",
+                            min_value=1.0,
+                            value=1.0,
+                            step=0.5,
+                            help="Establece las unidades promedio vendidas por cada fila del CSV."
                         )
+                        df["Quantity"] = cant_est
 
-                    st.success(
-                        "✓ Quantity encontrada. "
-                        "Utilizaremos los datos "
-                        "proporcionados en el archivo."
-                    )
-
-                else:
-
-                    st.warning(
-                        "⚠ Quantity no fue proporcionada."
-                    )
-
-                    st.info(
-                        "No pasa nada. Introduce una "
-                        "cantidad promedio por registro "
-                        "y nosotros hacemos el resto."
-                    )
-
-                    cantidad_promedio = (
-                        st.number_input(
-                            "Cantidad promedio por registro",
-                            min_value=0.01,
-                            value=3.0,
-                            step=1.0
+                # B) Si no existe costo de fabricación/proveedor en el CSV
+                if "Cost" not in df.columns:
+                    with col_inp2:
+                        costo_est = st.number_input(
+                            f"🏭 Costo unitario estimado de elaboración/proveedor ({codigo_moneda}):",
+                            min_value=0.0,
+                            value=0.0,
+                            step=1000.0,
+                            help="Costo de producción o compra por cada unidad."
                         )
-                    )
+                        df["Cost"] = costo_est
 
-        except Exception as error:
+                # 4. Cálculo de métricas principales derivadas del CSV
+                ventas_historicas = df["Sales"].sum()
+                unidades_totales = df["Quantity"].sum()
+                precio_actual = ventas_historicas / unidades_totales if unidades_totales > 0 else 0
 
-            st.error(
-                f"No pudimos leer el archivo. "
-                f"Detalle: {error}"
-            )
-
-            df = None
+        except Exception as e:
+            st.error(f"Error al leer el archivo CSV: {e}")
 
 
 # ============================================================
