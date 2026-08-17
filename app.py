@@ -281,7 +281,7 @@ cantidad_promedio = None
 # ========================================================
     # CARGA Y PROCESAMIENTO DE CSV (CON COMPLETADO ASISTIDO)
     # ========================================================
-    if # 1. Selector de modo (Pegado al margen izquierdo - 0 espacios)
+    # 1. Selector de modo (Pegado al margen izquierdo - 0 espacios)
 modo_trabajo = st.radio(
     "¿Cómo quieres trabajar?",
     ["Tengo una base de datos (CSV)", "No tengo una base de datos (CSV), quiero introducir estimaciones"]
