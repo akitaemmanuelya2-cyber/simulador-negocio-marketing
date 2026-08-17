@@ -622,7 +622,7 @@ if df is not None:
 
         st.info(
             f"📦 **Inversión en Proveedores o Elaboración:** "
-            f"**Antes: {texto_antes}** ➔ **Después: {texto_despues}**"
+            f"**Antes: {texto_antes} ➔ Después: {texto_despues}**"
         )
         # Calculamos diferencias
         diferencia_ventas = ventas_simuladas - ventas_historicas
