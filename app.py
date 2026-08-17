@@ -791,22 +791,23 @@ if df is not None:
     else:
         multiplicador = 0
 
-    texto_ganancia_extra = formatear_dinero(diferencia_ganancia).strip()
+    # Limpiamos espacios alrededor de las cadenas formateadas
     texto_presupuesto = formatear_dinero(presupuesto_marketing).strip()
+    texto_ganancia_extra = formatear_dinero(diferencia_ganancia).strip()
+    ganancia_por_unidad = formatear_dinero(multiplicador).strip()
 
     if ganancia_simulada > ganancia_historica:
         st.success(
             f"🚀 **¡Escenario Positivo!** "
-            f"Al invertir **{texto_presupuesto}** en publicidad, obtienes **{texto_ganancia_extra}** de ganancia limpia adicional. "
-            f"Esto significa que por cada **$1,000 COP** que pones en anuncios, te quedan **${multiplicador * 1000:,.0f} COP** libres "
-            f"(multiplicas tu inversión publicitaria **{multiplicador:.1f} veces**)."
+            f"Al invertir **{texto_presupuesto}**, obtienes **{texto_ganancia_extra}** de ganancia limpia adicional. "
+            f"Esto significa que por cada **1 {codigo_moneda}** que inviertes en anuncios, te quedan **{ganancia_por_unidad}** libres "
+            f"(multiplicas tu inversión **{multiplicador:.1f} veces**)."
         )
     else:
         st.warning(
             "⚠️ **Ojo con los números:** El aumento en costos o publicidad supera el margen generado. "
             "Ajusta el precio o reduce el presupuesto de marketing para asegurar ganancias."
         )
-
 
 # ========================================================
 # DATOS UTILIZADOS
