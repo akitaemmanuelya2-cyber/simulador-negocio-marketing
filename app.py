@@ -578,7 +578,7 @@ if df is not None:
             min_value=0.0,
             value=50000.0,
             step=10000.0,
-            format="%.0f"
+            format="%.0f",
             help="¿Cuánto quiero invertir en publicidad?"
         )
 
