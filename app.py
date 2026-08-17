@@ -281,13 +281,16 @@ cantidad_promedio = None
     # ========================================================
     # CARGA Y PROCESAMIENTO DE CSV (CON COMPLETADO ASISTIDO)
     # ========================================================
+
+if modo_trabajo == "Tengo una base de datos (CSV)":
+    # 1. Carga del archivo CSV
     archivo_subido = st.file_uploader("Sube tu archivo de ventas (.csv)", type=["csv"])
     
     if archivo_subido is not None:
         try:
             df = pd.read_csv(archivo_subido)
             
-            # 1. Normalización automática de nombres de columnas
+            # Normalización automática de nombres de columnas
             mapeo_columnas = {
                 "ventas": "Sales", "Ventas": "Sales", "monto": "Sales", "Monto": "Sales", 
                 "total": "Sales", "Total": "Sales", "precio": "Sales", "Price": "Sales",
@@ -295,16 +298,15 @@ cantidad_promedio = None
             }
             df = df.rename(columns=mapeo_columnas)
             
-            # 2. Validación de la columna indispensable de ventas
+            # Validación de la columna indispensable de ventas
             if "Sales" not in df.columns:
                 st.error("⚠️ El archivo debe contener al menos una columna de ventas o montos (ej. 'Sales', 'Ventas', 'Total').")
             else:
                 st.success(f"✅ ¡Base de datos cargada correctamente! ({len(df)} registros encontrados)")
                 
-                # 3. Completado asistido para columnas faltantes en CSVs básicos
+                # Completado asistido para columnas faltantes
                 col_inp1, col_inp2 = st.columns(2)
                 
-                # A) Si no existe la columna de cantidades en el CSV
                 if "Quantity" not in df.columns:
                     with col_inp1:
                         cant_est = st.number_input(
@@ -316,7 +318,6 @@ cantidad_promedio = None
                         )
                         df["Quantity"] = cant_est
 
-                # B) Si no existe costo de fabricación/proveedor en el CSV
                 if "Cost" not in df.columns:
                     with col_inp2:
                         costo_est = st.number_input(
@@ -328,7 +329,7 @@ cantidad_promedio = None
                         )
                         df["Cost"] = costo_est
 
-                # 4. Cálculo de métricas principales derivadas del CSV
+                # Métricas principales
                 ventas_historicas = df["Sales"].sum()
                 unidades_totales = df["Quantity"].sum()
                 precio_actual = ventas_historicas / unidades_totales if unidades_totales > 0 else 0
