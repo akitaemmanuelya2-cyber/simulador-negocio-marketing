@@ -616,13 +616,14 @@ if df is not None:
             costo_unitario=costo_unitario
         )
 
-        # Mensaje dinámico con el gasto total del proveedor
-        st.info(
-    f"📦 **Inversión en Proveedores o Elaboración:** "
-    f"Antes: **{formatear_dinero(costos_historicos)}** ➔ "
-    f"Después: **{formatear_dinero(costos_simulados)}**"
-)
+        # Limpiamos espacios para que el Markdown de Streamlit aplique la negrita correctamente
+        texto_antes = formatear_dinero(costos_historicos).strip()
+        texto_despues = formatear_dinero(costos_simulados).strip()
 
+        st.info(
+            f"📦 **Inversión en Proveedores o Elaboración:** "
+            f"Antes: **{texto_antes}** ➔ Después: **{texto_despues}**"
+        )
         # Calculamos diferencias
         diferencia_ventas = ventas_simuladas - ventas_historicas
         diferencia_ganancia = ganancia_simulada - ganancia_historica
