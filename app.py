@@ -647,13 +647,13 @@ if df is not None:
     except Exception as error:
         st.error(f"Ocurrió un inconveniente al simular los datos: {error}")
 
-    # ========================================================
+# ========================================================
     # 4. RECOMENDACIÓN DE INVERSIÓN EN MARKETING
     # ========================================================
 
     st.header("4. Recomendación de inversión en marketing")
 
-    # 1. Calculamos la distribución sugerida usando el presupuesto de la Sección 2
+    # 1. Calculamos la distribución sugerida
     (
         inversion_ig,
         inversion_fb,
@@ -665,41 +665,67 @@ if df is not None:
     if presupuesto_marketing > 0:
         st.write(
             f"Basado en un presupuesto de **{formatear_dinero(presupuesto_marketing)}**, "
-            f"esta es la distribución óptima sugerida para tus campañas:"
+            f"esta es la distribución estratégica sugerida para tus campañas:"
         )
 
-        col_mkt1, col_mkt2 = st.columns([2, 1])
+        # Columna 1: Gráfico visual | Columna 2: Tabla de datos | Columna 3: Resultado de Clientes
+        col_grafico, col_tabla, col_metrica = st.columns([1.2, 1.2, 1])
 
-        with col_mkt1:
-            # Creamos una tabla clara con la recomendación por canal
+        with col_grafico:
+            import plotly.graph_objects as go
+
+            canales = ["Instagram Ads", "Facebook Ads", "TikTok Ads", "Google Search"]
+            valores = [inversion_ig, inversion_fb, inversion_tk, inversion_gg]
+            colores = ["#E1306C", "#1877F2", "#00F2FE", "#EA4335"]  # Colores representativos de las marcas
+
+            fig = go.Figure(data=[go.Pie(
+                labels=canales,
+                values=valores,
+                hole=0.5, # Hace que sea un gráfico de dona elegante
+                marker_colors=colores,
+                textinfo="percent",
+                hoverinfo="label+value",
+            )])
+
+            fig.update_layout(
+                showlegend=True,
+                legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5),
+                margin=dict(l=10, r=10, t=10, b=10),
+                height=240,
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="white")
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col_tabla:
             datos_canales = {
-                "Canal / Red Social": ["Instagram Ads", "Facebook Ads", "TikTok Ads", "Google Search"],
-                "Inversión Sugerida": [
+                "Canal": ["Instagram Ads", "Facebook Ads", "TikTok Ads", "Google Search"],
+                "Inversión": [
                     formatear_dinero(inversion_ig),
                     formatear_dinero(inversion_fb),
                     formatear_dinero(inversion_tk),
                     formatear_dinero(inversion_gg)
-                ],
-                "Participación": ["40%", "30%", "20%", "10%"]
+                ]
             }
             st.table(datos_canales)
 
-        with col_mkt2:
+        with col_metrica:
             st.metric(
-                label="🎯 Clientes nuevos estimados",
+                label="🎯 Clientes nuevos",
                 value=f"+{clientes_nuevos}",
-                help="Proyección de personas adicionales que te comprarán gracias a la publicidad."
+                help="Proyección de compradores adicionales estimando un costo por cliente dinámico."
             )
+
+            costo_por_cliente = presupuesto_marketing / clientes_nuevos if clientes_nuevos > 0 else 0
             
-            # Un pequeño consejo dinámico y amigable
             st.success(
-                f"💡 **Tip rápido:** Cada nuevo cliente te cuesta en promedio "
-                f"**{formatear_dinero(presupuesto_marketing / clientes_nuevos if clientes_nuevos > 0 else 0)}** en publicidad."
+                f"💡 **Costo estimado:** Traer 1 cliente te cuesta **{formatear_dinero(costo_por_cliente)}** en publicidad."
             )
 
     else:
         st.warning("⚠️ Ingresa un presupuesto de marketing mayor a $0 en la Sección 2 para ver la recomendación de inversión.")
-
 
 # ========================================================
 # COMPARACIÓN FINANCIERA
