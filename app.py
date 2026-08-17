@@ -628,101 +628,89 @@ if df is not None:
 
     col1, col2, col3 = st.columns(3)
 
-with col1:
+    with col1:
 
-    precio_actual = st.number_input(
-        "Precio actual",
-        min_value=0.0,
-        value=50000.0,
-        step=1000.0,
-        format="%.0f"
-    )
-
-    nuevo_precio = st.number_input(
-        "Nuevo precio",
-        min_value=0.0,
-        value=52500.0,
-        step=1000.0,
-        format="%.0f"
-    )
-
-    if precio_actual > 0:
-        cambio_precio = (
-            (nuevo_precio - precio_actual)
-            / precio_actual
-        ) * 100
-    else:
-        cambio_precio = 0.0
-
-    st.caption(
-        f"Cambio de precio: {cambio_precio:+.1f}%"
-    )
-
-with col2:
-
-    presupuesto_marketing = st.number_input(
-        f"Presupuesto de marketing ({moneda['codigo']})",
-        min_value=0.0,
-        value=50000.0,
-        step=10000.0,
-        format="%.0f"
-    )
-
-with col3:
-
-    costo_porcentaje = st.number_input(
-        "Costo del proveedor (%)",
-        min_value=0.0,
-        max_value=100.0,
-        value=70.0,
-        step=1.0,
-        help=(
-            "Porcentaje de las ventas "
-            "destinado al costo del proveedor."
+        precio_actual = st.number_input(
+            "Precio actual",
+            min_value=0.0,
+            value=50000.0,
+            step=1000.0,
+            format="%.0f"
         )
-    )
 
-    costo_proveedor_estimado = (
-        ventas_historicas
-        * costo_porcentaje
-        / 100
-    )
+        nuevo_precio = st.number_input(
+            "Nuevo precio",
+            min_value=0.0,
+            value=52500.0,
+            step=1000.0,
+            format="%.0f"
+        )
 
-    st.caption(
-        f"Costo estimado: "
-        f"{formatear_dinero(costo_proveedor_estimado)} "
-        f"({costo_porcentaje:.1f}% de las ventas históricas)"
-    )
+        if precio_actual > 0:
+            cambio_precio = (
+                (nuevo_precio - precio_actual)
+                / precio_actual
+            ) * 100
+        else:
+            cambio_precio = 0.0
 
-st.divider()
+        st.caption(
+            f"Cambio de precio: {cambio_precio:+.1f}%"
+        )
+
+    with col2:
+
+        presupuesto_marketing = st.number_input(
+            f"Presupuesto de marketing ({moneda['codigo']})",
+            min_value=0.0,
+            value=50000.0,
+            step=10000.0,
+            format="%.0f"
+        )
+
+    with col3:
+
+        costo_porcentaje = st.number_input(
+            "Costo del proveedor (%)",
+            min_value=0.0,
+            max_value=100.0,
+            value=70.0,
+            step=1.0,
+            help=(
+                "Porcentaje de las ventas "
+                "destinado al costo del proveedor."
+            )
+        )
+
+    st.divider()
 
 
     # ========================================================
-# SIMULACIÓN
-# ========================================================
+    # SIMULACIÓN
+    # ========================================================
 
-try:
+    try:
 
-    (
-        ventas_historicas,
-        ganancia_historica,
-        ventas_simuladas,
-        ganancia_simulada
-    ) = simular_escenario_negocio(
-        df,
-        cambio_precio,
-        presupuesto_marketing,
-        cantidad_promedio=cantidad_promedio,
-        costo_porcentaje=costo_porcentaje
-    )
+        (
+            ventas_historicas,
+            ganancia_historica,
+            ventas_simuladas,
+            ganancia_simulada
+        ) = simular_escenario_negocio(
+            df,
+            cambio_precio,
+            presupuesto_marketing,
+            cantidad_promedio=cantidad_promedio,
+            costo_porcentaje=costo_porcentaje
+        )
 
-except ValueError as error:
+    except ValueError as error:
 
-    st.error(
-        str(error)
-    )
+        st.error(
+            str(error)
+        )
 
-    st.stop()
+        st.stop()
 
 
 # ========================================================
