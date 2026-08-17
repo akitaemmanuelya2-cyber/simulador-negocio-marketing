@@ -618,10 +618,10 @@ if df is not None:
 
         # Mensaje dinámico con el gasto total del proveedor
         st.info(
-            f"📦 **Inversión en Proveedores o Elaboración:** "
-            f"Antes: **{formatear_dinero(costos_historicos)}** ➔ "
-            f"Despúes: **{formatear_dinero(costos_simulados)}**"
-        )
+    f"📦 **Inversión en Proveedores o Elaboración:** "
+    f"Antes: **{formatear_dinero(costos_historicos)}** ➔ "
+    f"Después: **{formatear_dinero(costos_simulados)}**"
+)
 
         # Calculamos diferencias
         diferencia_ventas = ventas_simuladas - ventas_historicas
