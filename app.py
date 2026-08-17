@@ -268,7 +268,7 @@ st.caption(
 modo_datos = st.radio(
     "¿Cómo quieres trabajar?",
     [
-        "Tengo un CSV",
+        "Tengo una base de datos (CSV)",
         "No tengo una base de datos (CSV), quiero introducir estimaciones"
     ],
     horizontal=True
@@ -412,7 +412,7 @@ else:
 
     with col_man1:
         unidades_vendidas = st.number_input(
-            "Cantidad de productos/servicios vendidos en el período (Unidades)",
+            "Cantidad de productos o unidades vendidos.",
             min_value=1,
             value=80,
             step=1,
