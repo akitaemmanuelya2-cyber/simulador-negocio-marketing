@@ -487,37 +487,45 @@ if modo_datos == "Tengo un CSV":
 # ============================================================
 # OPCIÓN B: USUARIO SIN CSV
 # ============================================================
-
 else:
-
     st.info(
         "¿No tienes un CSV? No pasa nada. "
-        "Introduce algunos valores estimados "
-        "y nosotros hacemos el resto. 💡"
+        "Ingresa los datos generales de tu negocio y calculamos el resto. 💡"
     )
 
-    ventas_estimadas = st.number_input(
-        "Ventas históricas totales",
-        min_value=0.01,
-        value=10000.0,
-        step=100.0
-    )
+    col_man1, col_man2 = st.columns(2)
 
-    cantidad_promedio = st.number_input(
-        "Cantidad promedio por registro",
-        min_value=0.01,
-        value=3.0,
-        step=1.0
+    with col_man1:
+        unidades_vendidas = st.number_input(
+            "Cantidad de productos/servicios vendidos en el período (Unidades)",
+            min_value=1,
+            value=80,
+            step=1,
+            help="Ejemplo: Si vendiste 80 camisetas en el mes, ingresa 80."
+        )
+
+    with col_man2:
+        precio_actual_manual = st.number_input(
+            f"Precio de venta actual por unidad ({codigo_moneda})",
+            min_value=0.0,
+            value=50000.0,
+            step=1000.0,
+            format="%.0f"
+        )
+
+    # Calculamos las ventas históricas reales (Unidades x Precio)
+    ventas_estimadas = unidades_vendidas * precio_actual_manual
+    cantidad_promedio = 1.0  # Cada fila representa 1 unidad o la transacción total unificada
+
+    st.success(
+        f"💡 **Ventas históricas estimadas:** {formatear_dinero(ventas_estimadas)} "
+        f"({unidades_vendidas:,} unidades a {formatear_dinero(precio_actual_manual)} c/u)"
     )
 
     df = pd.DataFrame(
         {
-            "Sales": [
-                ventas_estimadas
-            ],
-            "Quantity": [
-                cantidad_promedio
-            ]
+            "Sales": [ventas_estimadas],
+            "Quantity": [unidades_vendidas]
         }
     )
 
