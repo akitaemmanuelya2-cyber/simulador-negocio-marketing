@@ -279,24 +279,24 @@ cantidad_promedio = None
 
 
 # ========================================================
-    # CARGA Y PROCESAMIENTO DE CSV (CON COMPLETADO ASISTIDO)
-    # ========================================================
-# 1. Selector de modo 
+# 1. SELECCIÓN DEL MODO DE TRABAJO (SOLO UN ST.RADIO)
+# ========================================================
 modo_trabajo = st.radio(
     "¿Cómo quieres trabajar?",
     ["Tengo una base de datos (CSV)", "No tengo una base de datos (CSV), quiero introducir estimaciones"]
 )
 
-# 2. Condicional principal 
+# ========================================================
+# OPCIÓN 1: CARGA DE CSV (CON COMPLETADO ASISTIDO)
+# ========================================================
 if modo_trabajo == "Tengo una base de datos (CSV)":
-    # A partir de aquí, TODO va con 4 espacios de sangría
     archivo_subido = st.file_uploader("Sube tu archivo de ventas (.csv)", type=["csv"])
     
     if archivo_subido is not None:
         try:
             df = pd.read_csv(archivo_subido)
             
-            # Normalización automática de columnas
+            # Normalización automática de nombres de columnas
             mapeo_columnas = {
                 "ventas": "Sales", "Ventas": "Sales", "monto": "Sales", "Monto": "Sales", 
                 "total": "Sales", "Total": "Sales", "precio": "Sales", "Price": "Sales",
@@ -333,7 +333,7 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
                         )
                         df["Cost"] = costo_est
 
-                # Métricas principales
+                # Métricas principales derivadas del CSV
                 ventas_historicas = df["Sales"].sum()
                 unidades_totales = df["Quantity"].sum()
                 precio_actual = ventas_historicas / unidades_totales if unidades_totales > 0 else 0
