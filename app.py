@@ -543,7 +543,7 @@ if df is not None:
 
 
     # ========================================================
-    # PARÁMETROS DEL ESCENARIO
+    # 2. PARÁMETROS DEL ESCENARIO
     # ========================================================
 
     st.header("2. Diseña tu escenario")
@@ -558,14 +558,13 @@ if df is not None:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.write(f"**Precio actual:** {formatear_dinero(precio_actual_calculado)}")
-
         nuevo_precio = st.number_input(
             f"Nuevo precio propuesto ({codigo_moneda})",
             min_value=0.0,
-            value=float(precio_actual_calculado * 1.05), # Sugiere un +5% por defecto
+            value=float(precio_actual_calculado * 1.05),
             step=1000.0,
-            format="%.0f"
+            format="%.0f",
+            help=f"Precio actual registrado: {formatear_dinero(precio_actual_calculado)}"
         )
 
         if precio_actual_calculado > 0:
@@ -573,7 +572,10 @@ if df is not None:
         else:
             cambio_precio = 0.0
 
-        st.caption(f"Cambio de precio: **{cambio_precio:+.1f}%**")
+        st.caption(
+            f"Precio actual: **{formatear_dinero(precio_actual_calculado)}** "
+            f"({cambio_precio:+.1f}%)"
+        )
 
     with col2:
         presupuesto_marketing = st.number_input(
@@ -596,57 +598,60 @@ if df is not None:
 
     st.divider()
 
+    # ========================================================
+    # SIMULACIÓN Y RESULTADOS
+    # ========================================================
 
-# ========================================================
-# RESULTADOS
-# ========================================================
+    try:
+        (
+            ventas_historicas,
+            ganancia_historica,
+            ventas_simuladas,
+            ganancia_simulada
+        ) = simular_escenario_negocio(
+            df,
+            cambio_precio,
+            presupuesto_marketing,
+            nuevo_precio_unitario=nuevo_precio,
+            costo_porcentaje=costo_porcentaje
+        )
 
-st.header(
-    "3. Resultados"
-)
+        # Calculamos diferencias
+        diferencia_ventas = ventas_simuladas - ventas_historicas
+        diferencia_ganancia = ganancia_simulada - ganancia_historica
 
-diferencia_ventas = (
-    ventas_simuladas
-    - ventas_historicas
-)
+        st.header("3. Resultados")
 
-diferencia_ganancia = (
-    ganancia_simulada
-    - ganancia_historica
-)
+        col_res1, col_res2, col_res3, col_res4 = st.columns(4)
 
-col1, col2, col3, col4 = st.columns(4)
+        with col_res1:
+            st.metric(
+                "Ventas históricas",
+                formatear_dinero(ventas_historicas)
+            )
 
-with col1:
+        with col_res2:
+            st.metric(
+                "Ventas simuladas",
+                formatear_dinero(ventas_simuladas),
+                formatear_dinero(diferencia_ventas)
+            )
 
-    st.metric(
-        "Ventas históricas",
-        formatear_dinero(ventas_historicas)
-    )
+        with col_res3:
+            st.metric(
+                "Ganancia histórica",
+                formatear_dinero(ganancia_historica)
+            )
 
-with col2:
+        with col_res4:
+            st.metric(
+                "Ganancia simulada",
+                formatear_dinero(ganancia_simulada),
+                formatear_dinero(diferencia_ganancia)
+            )
 
-    st.metric(
-        "Ventas simuladas",
-        formatear_dinero(ventas_simuladas),
-        formatear_dinero(diferencia_ventas)
-    )
-
-with col3:
-
-    st.metric(
-        "Ganancia histórica",
-        formatear_dinero(ganancia_historica)
-    )
-
-with col4:
-
-    st.metric(
-        "Ganancia simulada",
-        formatear_dinero(ganancia_simulada),
-        formatear_dinero(diferencia_ganancia)
-    )
-
+    except Exception as error:
+        st.error(f"Ocurrió un inconveniente al simular los datos: {error}")
 
 # ========================================================
 # RECOMENDACIÓN DE MARKETING
