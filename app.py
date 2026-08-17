@@ -279,14 +279,6 @@ cantidad_promedio = None
 
 
 # ========================================================
-# 1. SELECCIÓN DEL MODO DE TRABAJO (SOLO UN ST.RADIO)
-# ========================================================
-modo_trabajo = st.radio(
-    "¿Cómo quieres trabajar?",
-    ["Tengo una base de datos (CSV)", "No tengo una base de datos (CSV), quiero introducir estimaciones"]
-)
-
-# ========================================================
 # OPCIÓN 1: CARGA DE CSV (CON COMPLETADO ASISTIDO)
 # ========================================================
 if modo_trabajo == "Tengo una base de datos (CSV)":
