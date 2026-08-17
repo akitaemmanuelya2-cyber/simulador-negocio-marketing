@@ -542,13 +542,12 @@ if df is not None:
         )
 
 
-    # ========================================================
+# ========================================================
     # 2. PARÁMETROS DEL ESCENARIO
     # ========================================================
 
     st.header("2. Diseña tu escenario")
 
-    # Calculamos el precio actual automáticamente según la fuente de datos
     unidades_totales = df["Quantity"].sum()
     if unidades_totales > 0:
         precio_actual_calculado = float(df["Sales"].sum() / unidades_totales)
@@ -572,10 +571,7 @@ if df is not None:
         else:
             cambio_precio = 0.0
 
-        st.caption(
-            f"Precio actual: **{formatear_dinero(precio_actual_calculado)}** "
-            f"({cambio_precio:+.1f}%)"
-        )
+        st.caption(f"Precio actual: **{formatear_dinero(precio_actual_calculado)}** ({cambio_precio:+.1f}%)")
 
     with col2:
         presupuesto_marketing = st.number_input(
@@ -587,14 +583,17 @@ if df is not None:
         )
 
     with col3:
-        costo_porcentaje = st.number_input(
-            "Costo del proveedor (%)",
+        costo_unitario = st.number_input(
+            f"Costo por unidad / proveedor ({codigo_moneda})",
             min_value=0.0,
-            max_value=100.0,
-            value=40.0,
-            step=1.0,
-            help="Porcentaje de las ventas destinado a producir o comprar el producto."
+            value=float(precio_actual_calculado * 0.40),
+            step=1000.0,
+            format="%.0f",
+            help="¿Cuánto te cuesta comprar o fabricar cada producto?"
         )
+
+        porcentaje_equiv = (costo_unitario / nuevo_precio * 100) if nuevo_precio > 0 else 0
+        st.caption(f"Equivale al **{porcentaje_equiv:.1f}%** del nuevo precio")
 
     st.divider()
 
@@ -607,13 +606,22 @@ if df is not None:
             ventas_historicas,
             ganancia_historica,
             ventas_simuladas,
-            ganancia_simulada
+            ganancia_simulada,
+            costos_historicos,
+            costos_simulados
         ) = simular_escenario_negocio(
             df,
             cambio_precio,
             presupuesto_marketing,
             nuevo_precio_unitario=nuevo_precio,
-            costo_porcentaje=costo_porcentaje
+            costo_unitario=costo_unitario
+        )
+
+        # Mensaje dinámico con el gasto total del proveedor
+        st.info(
+            f"📦 **Inversión en Proveedores/Producción:** "
+            f"Pasado: **{formatear_dinero(costos_historicos)}** ➔ "
+            f"Simulado: **{formatear_dinero(costos_simulados)}**"
         )
 
         # Calculamos diferencias
@@ -625,30 +633,16 @@ if df is not None:
         col_res1, col_res2, col_res3, col_res4 = st.columns(4)
 
         with col_res1:
-            st.metric(
-                "Ventas históricas",
-                formatear_dinero(ventas_historicas)
-            )
+            st.metric("Ventas históricas", formatear_dinero(ventas_historicas))
 
         with col_res2:
-            st.metric(
-                "Ventas simuladas",
-                formatear_dinero(ventas_simuladas),
-                formatear_dinero(diferencia_ventas)
-            )
+            st.metric("Ventas simuladas", formatear_dinero(ventas_simuladas), formatear_dinero(diferencia_ventas))
 
         with col_res3:
-            st.metric(
-                "Ganancia histórica",
-                formatear_dinero(ganancia_historica)
-            )
+            st.metric("Ganancia histórica", formatear_dinero(ganancia_historica))
 
         with col_res4:
-            st.metric(
-                "Ganancia simulada",
-                formatear_dinero(ganancia_simulada),
-                formatear_dinero(diferencia_ganancia)
-            )
+            st.metric("Ganancia simulada", formatear_dinero(ganancia_simulada), formatear_dinero(diferencia_ganancia))
 
     except Exception as error:
         st.error(f"Ocurrió un inconveniente al simular los datos: {error}")
@@ -661,10 +655,6 @@ st.header(
     "4. Recomendación de inversión en marketing"
 )
 
-# Reemplaza esta línea:
-# (inversion_instagram, ..., clientes_nuevos) = optimizar_marketing(presupuesto_marketing)
-
-# Por esta línea corregida:
 (
     inversion_instagram,
     inversion_facebook,
