@@ -634,16 +634,20 @@ if df is not None:
         col_res1, col_res2, col_res3, col_res4 = st.columns(4)
 
         with col_res1:
-            st.metric("Ventas históricas", formatear_dinero(ventas_historicas))
+            st.metric("Valor total en ventas", formatear_dinero(ventas_historicas))
 
         with col_res2:
-            st.metric("Ventas simuladas", formatear_dinero(ventas_simuladas), formatear_dinero(diferencia_ventas))
+            st.metric("Valor total en ventas simuladas", formatear_dinero(ventas_simuladas), formatear_dinero(diferencia_ventas))
 
         with col_res3:
-            st.metric("Ganancia histórica", formatear_dinero(ganancia_historica))
+            st.metric("Ganancia neta histórica", formatear_dinero(ganancia_historica),
+            help="Valor total de ganancia restando el costo de proveedor o elaboración"
+                     )              
 
         with col_res4:
-            st.metric("Ganancia simulada", formatear_dinero(ganancia_simulada), formatear_dinero(diferencia_ganancia))
+            st.metric("Ganancia neta simulada", formatear_dinero(ganancia_simulada), formatear_dinero(diferencia_ganancia),
+            help="Valor total de ganancia restando el costo de proveedor o elaboración con la simulación"
+                     )
 
     except Exception as error:
         st.error(f"Ocurrió un inconveniente al simular los datos: {error}")
