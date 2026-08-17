@@ -546,46 +546,38 @@ if df is not None:
     # PARÁMETROS DEL ESCENARIO
     # ========================================================
 
-    st.header(
-        "2. Diseña tu escenario"
-    )
+    st.header("2. Diseña tu escenario")
+
+    # Calculamos el precio actual automáticamente según la fuente de datos
+    unidades_totales = df["Quantity"].sum()
+    if unidades_totales > 0:
+        precio_actual_calculado = float(df["Sales"].sum() / unidades_totales)
+    else:
+        precio_actual_calculado = 50000.0
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
-
-        precio_actual = st.number_input(
-            "Precio actual",
-            min_value=0.0,
-            value=50000.0,
-            step=1000.0,
-            format="%.0f"
-        )
+        st.write(f"**Precio actual:** {formatear_dinero(precio_actual_calculado)}")
 
         nuevo_precio = st.number_input(
-            "Nuevo precio",
+            f"Nuevo precio propuesto ({codigo_moneda})",
             min_value=0.0,
-            value=52500.0,
+            value=float(precio_actual_calculado * 1.05), # Sugiere un +5% por defecto
             step=1000.0,
             format="%.0f"
         )
 
-        if precio_actual > 0:
-            cambio_precio = (
-                (nuevo_precio - precio_actual)
-                / precio_actual
-            ) * 100
+        if precio_actual_calculado > 0:
+            cambio_precio = ((nuevo_precio - precio_actual_calculado) / precio_actual_calculado) * 100
         else:
             cambio_precio = 0.0
 
-        st.caption(
-            f"Cambio de precio: {cambio_precio:+.1f}%"
-        )
+        st.caption(f"Cambio de precio: **{cambio_precio:+.1f}%**")
 
     with col2:
-
         presupuesto_marketing = st.number_input(
-            f"Presupuesto de marketing ({moneda['codigo']})",
+            f"Presupuesto de marketing ({codigo_moneda})",
             min_value=0.0,
             value=50000.0,
             step=10000.0,
@@ -593,61 +585,16 @@ if df is not None:
         )
 
     with col3:
-
         costo_porcentaje = st.number_input(
             "Costo del proveedor (%)",
             min_value=0.0,
             max_value=100.0,
-            value=70.0,
+            value=40.0,
             step=1.0,
-            help=(
-                "Porcentaje de las ventas "
-                "destinado al costo del proveedor."
-            )
+            help="Porcentaje de las ventas destinado a producir o comprar el producto."
         )
 
     st.divider()
-
-
-    # ========================================================
-    # SIMULACIÓN
-    # ========================================================
-
-    try:
-
-        (
-            ventas_historicas,
-            ganancia_historica,
-            ventas_simuladas,
-            ganancia_simulada
-        ) = simular_escenario_negocio(
-            df,
-            cambio_precio,
-            presupuesto_marketing,
-            nuevo_precio_unitario=nuevo_precio,
-            costo_porcentaje=costo_porcentaje
-        )
-    except ValueError as error:
-
-        st.error(
-            str(error)
-        )
-
-        st.stop()
-
-
-    costo_proveedor_estimado = (
-        ventas_historicas
-        * costo_porcentaje
-        / 100
-    )
-
-    st.caption(
-        f"Costo estimado del proveedor: "
-        f"{formatear_dinero(costo_proveedor_estimado)} "
-        f"({costo_porcentaje:.1f}% de las ventas históricas)"
-    )
-
 
 
 # ========================================================
@@ -709,6 +656,10 @@ st.header(
     "4. Recomendación de inversión en marketing"
 )
 
+# Reemplaza esta línea:
+# (inversion_instagram, ..., clientes_nuevos) = optimizar_marketing(presupuesto_marketing)
+
+# Por esta línea corregida:
 (
     inversion_instagram,
     inversion_facebook,
@@ -716,7 +667,8 @@ st.header(
     inversion_google,
     clientes_nuevos
 ) = optimizar_marketing(
-    presupuesto_marketing
+    presupuesto_marketing,
+    nuevo_precio
 )
 
 col1, col2 = st.columns(
