@@ -316,7 +316,7 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
         
         try:
             # 1. Cargamos el archivo base (asegúrate de que train_2.csv esté en la carpeta de tu app)
-            df_demo = pd.read_csv("train_2.csv")
+            df_demo = pd.read_csv("train.csv")
             
             # 2. Normalización automática (por si acaso)
             mapeo_columnas_demo = {
