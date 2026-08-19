@@ -279,60 +279,99 @@ cantidad_promedio = None
 
 
 # ========================================================
-# OPCIÓN 1: CARGA DE CSV (CON COMPLETADO ASISTIDO)
+# OPCIÓN 1: CARGA, AUDITORÍA Y SIMULACIÓN DE CSV
 # ========================================================
 if modo_trabajo == "Tengo una base de datos (CSV)":
-    archivo_subido = st.file_uploader("Sube tu archivo de ventas (.csv)", type=["csv"])
     
-    if archivo_subido is not None:
+    st.info("💡 Hemos mejorado nuestra herramienta. Elige el modo que mejor se adapte a tus datos.")
+
+    # 1. FIX DE MONEDA: Tasa de cambio real
+    st.markdown("### 💱 Ajuste de Divisa")
+    if codigo_moneda != "USD":
+        tasa_cambio = st.number_input(
+            f"Tasa de cambio actual (¿A cuánto equivale 1 USD en {codigo_moneda}?):",
+            min_value=1.0,
+            value=4000.0 if codigo_moneda == "COP" else 1.0,
+            step=50.0,
+            help="Tus datos serán multiplicados por esta tasa para reflejar valores reales."
+        )
+    else:
+        tasa_cambio = 1.0 # Si es USD, la tasa es 1 a 1
+
+    st.divider()
+
+    # 2. CREACIÓN DE LAS 3 PESTAÑAS (EL EMBUDO)
+    tab_demo, tab_asistido, tab_pro = st.tabs([
+        "🎮 Modo Demo (Datos de prueba)", 
+        "🤝 Modo Asistido (Tabla Amigable)", 
+        "🚀 Modo Pro Ultra (Auditoría)"
+    ])
+
+    # ---------------------------------------------------------
+    # PESTAÑA 1: MODO DEMO
+    # ---------------------------------------------------------
+    with tab_demo:
+        st.subheader("🎮 Explora la magia sin subir archivos")
+        st.write("Hemos cargado una base de datos de ejemplo (Train CSV) para que veas el potencial del simulador al instante. ¡Juega con los controles!")
+        
         try:
-            df = pd.read_csv(archivo_subido)
+            # 1. Cargamos el archivo base (asegúrate de que train_2.csv esté en la carpeta de tu app)
+            df_demo = pd.read_csv("train_2.csv")
             
-            # Normalización automática de nombres de columnas
-            mapeo_columnas = {
+            # 2. Normalización automática (por si acaso)
+            mapeo_columnas_demo = {
                 "ventas": "Sales", "Ventas": "Sales", "monto": "Sales", "Monto": "Sales", 
-                "total": "Sales", "Total": "Sales", "precio": "Sales", "Price": "Sales",
-                "cantidad": "Quantity", "Cantidad": "Quantity", "unidades": "Quantity", "Units": "Quantity"
+                "cantidad": "Quantity", "Cantidad": "Quantity", "unidades": "Quantity", "Units": "Quantity",
+                "costo": "Cost", "Costo": "Cost"
             }
-            df = df.rename(columns=mapeo_columnas)
+            df_demo = df_demo.rename(columns=mapeo_columnas_demo)
             
-            if "Sales" not in df.columns:
-                st.error("⚠️ El archivo debe contener al menos una columna de ventas o montos (ej. 'Sales', 'Ventas', 'Total').")
-            else:
-                st.success(f"✅ ¡Base de datos cargada correctamente! ({len(df)} registros encontrados)")
+            # 3. Aplicamos la tasa de cambio a las columnas financieras
+            if "Sales" in df_demo.columns:
+                df_demo["Sales"] = df_demo["Sales"] * tasa_cambio
+            
+            if "Cost" in df_demo.columns:
+                df_demo["Cost"] = df_demo["Cost"] * tasa_cambio
                 
-                col_inp1, col_inp2 = st.columns(2)
+            # 4. Si el archivo base no tiene cantidad, forzamos un valor para que la demo funcione
+            if "Quantity" not in df_demo.columns:
+                df_demo["Quantity"] = 1.0
                 
-                if "Quantity" not in df.columns:
-                    with col_inp1:
-                        cant_est = st.number_input(
-                            "📦 Cantidad promedio por venta/registro:",
-                            min_value=1.0,
-                            value=1.0,
-                            step=0.5,
-                            help="Establece las unidades promedio vendidas por cada fila del CSV."
-                        )
-                        df["Quantity"] = cant_est
-
-                if "Cost" not in df.columns:
-                    with col_inp2:
-                        costo_est = st.number_input(
-                            f"🏭 Costo unitario estimado de elaboración/proveedor ({codigo_moneda}):",
-                            min_value=0.0,
-                            value=0.0,
-                            step=1000.0,
-                            help="Costo de producción o compra por cada unidad."
-                        )
-                        df["Cost"] = costo_est
-
-                # Métricas principales derivadas del CSV
-                ventas_historicas = df["Sales"].sum()
-                unidades_totales = df["Quantity"].sum()
-                precio_actual = ventas_historicas / unidades_totales if unidades_totales > 0 else 0
-
+            # 5. Mostramos un resumen de la base cargada
+            st.success(f"✅ ¡Base Demo cargada! ({len(df_demo):,} registros listos para simular).")
+            
+            # Extraemos las métricas para pasarlas a la sección 2 (Diseña tu escenario)
+            ventas_historicas = df_demo["Sales"].sum()
+            unidades_totales = df_demo["Quantity"].sum()
+            
+            # En la demo, el df principal será df_demo
+            df = df_demo 
+            
+        except FileNotFoundError:
+            st.error("⚠️ No se encontró el archivo 'train_2.csv'. Asegúrate de subirlo a la misma carpeta que app.py.")
+            df = None
         except Exception as e:
-            st.error(f"Error al leer el archivo CSV: {e}")
+            st.error(f"Error cargando la demo: {e}")
+            df = None
 
+    # ---------------------------------------------------------
+    # PESTAÑA 2: MODO ASISTIDO
+    # ---------------------------------------------------------
+    with tab_asistido:
+        st.subheader("Sube lo que tengas, nosotros te ayudamos")
+        st.write("Solo necesitas un archivo con tus productos y el total de ventas. Rellena el resto aquí mismo.")
+        archivo_asistido = st.file_uploader("Sube tu archivo básico (.csv)", type=["csv"], key="up_asistido")
+        # Aquí irá el st.data_editor (la tablita amigable)
+
+    # ---------------------------------------------------------
+    # PESTAÑA 3: MODO PRO ULTRA
+    # ---------------------------------------------------------
+    with tab_pro:
+        st.subheader("El Detective de Negocios")
+        st.write("Sube tu archivo con el formato completo y obtén una radiografía profunda de tus productos estrella, fugas de capital y más.")
+        # Opcional: Botón para descargar plantilla CSV
+        archivo_pro = st.file_uploader("Sube tu archivo completo (.csv)", type=["csv"], key="up_pro")
+        # Aquí irá el escáner profundo y los KPIs de auditoría
 # ============================================================
 # OPCIÓN B: USUARIO SIN CSV
 # ============================================================
