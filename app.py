@@ -371,7 +371,19 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
                     st.success(f"💎 **El producto más costoso:**\n\n*{mas_caro[col_prod]}*\n\nPrecio aprox: **{formatear_dinero(mas_caro['Precio_Unitario'])}**")
                     
                 with col_det2:
-                    st.warning(f"💀 **El Hueso (Menos ingresos):**\n\n*{hueso[col_prod]}*\n\nGeneró: **{formatear_dinero(hueso['Total_Ventas'])}** (¡Considera una promoción para sacarlo!)")
+                    ventas_hueso = hueso['Total_Ventas']
+                    
+                    # El Detective evalúa si literalmente no vendió nada o si vendió muy poco
+                    if ventas_hueso == 0:
+                        st.warning(f"💀 **El Hueso (Cero ventas):**\n\n*{hueso[col_prod]}*\n\nGeneró: **$ 0 {codigo_moneda}**\n\n(¡Literalmente no vendió nada! Urgente planear una estrategia o sacarlo del inventario).")
+                    else:
+                        st.warning(f"💀 **El Hueso (Menos ingresos):**\n\n*{hueso[col_prod]}*\n\nGeneró: **{formatear_dinero(ventas_hueso)}**\n\n(Es el que menos dinero trajo de la lista. ¡Considera una promoción para sacarlo!)")
+                    
+                    # Para el más económico, evitamos los que puedan tener precio 0 por error de digitación en el CSV
+                    df_baratos = df_agrupado[df_agrupado["Precio_Unitario"] > 0]
+                    if not df_baratos.empty:
+                        mas_barato = df_baratos.loc[df_baratos["Precio_Unitario"].idxmin()]
+                        st.error(f"🏷️ **El más económico:**\n\n*{mas_barato[col_prod]}*\n\nPrecio aprox: **{formatear_dinero(mas_barato['Precio_Unitario'])}**")
                     
                     # Para el más económico, evitamos los que puedan tener precio 0 por error de digitación en el CSV
                     df_baratos = df_agrupado[df_agrupado["Precio_Unitario"] > 0]
