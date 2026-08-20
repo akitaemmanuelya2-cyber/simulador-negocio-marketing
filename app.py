@@ -377,37 +377,39 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
                         mas_barato = df_baratos.loc[df_baratos["Precio_Unitario"].idxmin()]
                         st.error(f"🏷️ **El más económico:**\n\n*{mas_barato[col_prod]}*\n\nPrecio aprox: **{formatear_dinero(mas_barato['Precio_Unitario'])}**")
                 
+# =========================================================
+                # 📊 TABLERO VISUAL DE RENDIMIENTO (ACTUALIZADO A VOLUMEN)
                 # =========================================================
-                # 📊 TABLERO VISUAL DE RENDIMIENTO (¡LOS NUEVOS GRÁFICOS!)
-                # =========================================================
-                st.markdown("### 📊 Tablero de Rendimiento")
+                st.markdown("### 📊 Tablero de Rendimiento (Volumen de Ventas)")
                 
                 import plotly.express as px
                 
                 col_g1, col_g2 = st.columns(2)
                 
                 with col_g1:
-                    df_top5 = df_agrupado.sort_values(by="Total_Ventas", ascending=False).head(5)
+                    # Filtramos los 5 mejores por CANTIDAD de unidades
+                    df_top5 = df_agrupado.sort_values(by="Total_Unidades", ascending=False).head(5)
                     fig_top = px.bar(
-                        df_top5, x="Total_Ventas", y=col_prod, orientation='h', 
-                        title="🏆 Top 5: Los Motores del Negocio",
-                        color_discrete_sequence=["#00C853"]
+                        df_top5, x="Total_Unidades", y=col_prod, orientation='h', 
+                        title="🏆 Top 5: Los Más Populares (Unidades)",
+                        color_discrete_sequence=["#00C853"],
+                        labels={"Total_Unidades": "Unidades Vendidas", col_prod: "Producto"}
                     )
+                    # Ajustamos el diseño para que el más vendido quede arriba
                     fig_top.update_layout(yaxis={'categoryorder':'total ascending'}, height=350, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
                     st.plotly_chart(fig_top, use_container_width=True)
                     
                 with col_g2:
-                    df_bottom5 = df_agrupado.sort_values(by="Total_Ventas", ascending=True).head(5)
+                    # Filtramos los 5 peores por CANTIDAD de unidades
+                    df_bottom5 = df_agrupado.sort_values(by="Total_Unidades", ascending=True).head(5)
                     fig_bottom = px.bar(
-                        df_bottom5, x="Total_Ventas", y=col_prod, orientation='h', 
-                        title="💀 Bottom 5: Los que están estancados",
-                        color_discrete_sequence=["#D32F2F"]
+                        df_bottom5, x="Total_Unidades", y=col_prod, orientation='h', 
+                        title="💀 Bottom 5: Los Menos Movidos (Unidades)",
+                        color_discrete_sequence=["#D32F2F"],
+                        labels={"Total_Unidades": "Unidades Vendidas", col_prod: "Producto"}
                     )
                     fig_bottom.update_layout(yaxis={'categoryorder':'total descending'}, height=350, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
                     st.plotly_chart(fig_bottom, use_container_width=True)
-
-            else:
-                st.write("💡 *El escáner no detectó una columna de nombres de productos para hacer la auditoría.*")
             
             # =========================================================
             # 💡 EL VEREDICTO DE TARS (DIAGNÓSTICO NARRATIVO)
