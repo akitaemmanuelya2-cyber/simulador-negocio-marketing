@@ -385,11 +385,6 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
                         mas_barato = df_baratos.loc[df_baratos["Precio_Unitario"].idxmin()]
                         st.error(f"🏷️ **El más económico:**\n\n*{mas_barato[col_prod]}*\n\nPrecio aprox: **{formatear_dinero(mas_barato['Precio_Unitario'])}**")
                     
-                    # Para el más económico, evitamos los que puedan tener precio 0 por error de digitación en el CSV
-                    df_baratos = df_agrupado[df_agrupado["Precio_Unitario"] > 0]
-                    if not df_baratos.empty:
-                        mas_barato = df_baratos.loc[df_baratos["Precio_Unitario"].idxmin()]
-                        st.error(f"🏷️ **El más económico:**\n\n*{mas_barato[col_prod]}*\n\nPrecio aprox: **{formatear_dinero(mas_barato['Precio_Unitario'])}**")
             else:
                 st.write("💡 *El escáner no detectó una columna de nombres de productos para hacer la auditoría.*")
             
