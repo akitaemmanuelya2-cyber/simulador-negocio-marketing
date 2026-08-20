@@ -315,7 +315,7 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
         st.write("Hemos cargado una base de datos de ejemplo (Train CSV) para que veas el potencial del simulador al instante. ¡Juega con los controles!")
         
         try:
-            # 1. Cargamos el archivo base (asegúrate de que train_2.csv esté en la carpeta de tu app)
+            # 1. Cargamos el archivo base (asegúrate de que train.csv esté en la carpeta de tu app)
             df_demo = pd.read_csv("train.csv")
             
             # 2. Normalización automática (por si acaso)
@@ -339,6 +339,50 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
                 
             # 5. Mostramos un resumen de la base cargada
             st.success(f"✅ ¡Base Demo cargada! ({len(df_demo):,} registros listos para simular).")
+
+            # =========================================================
+            # 🕵️‍♂️ EL DETECTIVE DE DATOS (RADIOGRAFÍA DEL NEGOCIO)
+            # =========================================================
+            st.markdown("### 🕵️‍♂️ Radiografía de tu Negocio")
+            
+            # Buscamos la columna de productos (en tu train_2.csv suele llamarse 'Product Name' o 'Producto')
+            col_prod = "Product Name" if "Product Name" in df_demo.columns else ("Producto" if "Producto" in df_demo.columns else None)
+            
+            if col_prod:
+                # 1. Agrupamos las ventas y cantidades por producto
+                df_agrupado = df_demo.groupby(col_prod).agg(
+                    Total_Ventas=("Sales", "sum"),
+                    Total_Unidades=("Quantity", "sum")
+                ).reset_index()
+                
+                # 2. Calculamos el precio unitario promedio de cada producto
+                df_agrupado["Precio_Unitario"] = df_agrupado["Total_Ventas"] / df_agrupado["Total_Unidades"]
+                
+                # 3. Identificamos a los ganadores y perdedores
+                rey = df_agrupado.loc[df_agrupado["Total_Ventas"].idxmax()]
+                hueso = df_agrupado.loc[df_agrupado["Total_Ventas"].idxmin()]
+                mas_caro = df_agrupado.loc[df_agrupado["Precio_Unitario"].idxmax()]
+                
+                # 4. Diseñamos las tarjetas visuales
+                col_det1, col_det2 = st.columns(2)
+                
+                with col_det1:
+                    st.info(f"🏆 **El Rey (Más ingresos):**\n\n*{rey[col_prod]}*\n\nGeneró: **{formatear_dinero(rey['Total_Ventas'])}**")
+                    st.success(f"💎 **El producto más costoso:**\n\n*{mas_caro[col_prod]}*\n\nPrecio aprox: **{formatear_dinero(mas_caro['Precio_Unitario'])}**")
+                    
+                with col_det2:
+                    st.warning(f"💀 **El Hueso (Menos ingresos):**\n\n*{hueso[col_prod]}*\n\nGeneró: **{formatear_dinero(hueso['Total_Ventas'])}** (¡Considera una promoción para sacarlo!)")
+                    
+                    # Para el más económico, evitamos los que puedan tener precio 0 por error de digitación en el CSV
+                    df_baratos = df_agrupado[df_agrupado["Precio_Unitario"] > 0]
+                    if not df_baratos.empty:
+                        mas_barato = df_baratos.loc[df_baratos["Precio_Unitario"].idxmin()]
+                        st.error(f"🏷️ **El más económico:**\n\n*{mas_barato[col_prod]}*\n\nPrecio aprox: **{formatear_dinero(mas_barato['Precio_Unitario'])}**")
+            else:
+                st.write("💡 *El escáner no detectó una columna de nombres de productos para hacer la auditoría.*")
+            
+            st.divider()
+            # =========================================================
             
             # Extraemos las métricas para pasarlas a la sección 2 (Diseña tu escenario)
             ventas_historicas = df_demo["Sales"].sum()
