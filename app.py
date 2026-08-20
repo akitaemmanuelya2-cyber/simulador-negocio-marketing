@@ -388,6 +388,22 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
             else:
                 st.write("💡 *El escáner no detectó una columna de nombres de productos para hacer la auditoría.*")
             
+            # =========================================================
+            # 💡 EL VEREDICTO DE TARS (DIAGNÓSTICO NARRATIVO)
+            # =========================================================
+            st.markdown("### 💡 El Veredicto Estratégico")
+            
+            if col_prod and not df_agrupado.empty:
+                st.info(
+                    f"👋 **¡Hola, mi amigo emprendedor!** Analizando los números de tu negocio, aquí tienes el plan de acción táctico:\n\n"
+                    f"🚀 **¡Felicidades por tu estrella!** Tu producto rey (*{rey[col_prod]}*) es una verdadera máquina de tracción. "
+                    f"Si vende tanto, es porque encontraste el punto dulce de tu mercado. La regla de oro: ¡Prohibido quedarse sin stock de este campeón!\n\n"
+                    f"💀 **Alerta de cuidados intensivos:** Ese *{hueso[col_prod]}* es tu producto hueso y te está robando espacio valioso. "
+                    f"Mi consejo: armar un 'pague 1 lleve 2', meterlo en un combo con el Rey, o liquidarlo urgente para recuperar capital y enfocarte en lo que sí deja plata.\n\n"
+                    f"🏷️ **Tu arma secreta:** Tienes el *{mas_barato[col_prod]}* como tu producto más económico. "
+                    f"No lo desprecies; este es tu 'producto gancho' perfecto. Úsalo en publicidad para atraer a la gente a tu tienda con su precio bajo, y una vez adentro... ¡les vendes el resto del catálogo!"
+                )
+            
             st.divider()
             # =========================================================
             
