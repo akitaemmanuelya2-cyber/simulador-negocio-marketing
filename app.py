@@ -609,23 +609,84 @@ if df is not None:
         )
 
 
-    # ========================================================
-    # 🕹️ PANEL DE SIMULACIÓN (NUEVAS PESTAÑAS ESTRATÉGICAS)
-    # ========================================================
-    st.header("🕹️ Panel de Simulación Estratégica")
-    st.write("Ahora que el detective revisó tu pasado, vamos a diseñar tu futuro paso a paso.")
+# ========================================================
+            # 🕹️ PANEL DE SIMULACIÓN EN TIEMPO REAL
+            # ========================================================
+            st.header("🕹️ Simulador en Tiempo Real")
+            st.write("Ajusta tus precios y costos, y observa el impacto financiero al instante.")
 
-    # Calculamos el precio actual base para los sliders
-    unidades_totales = df["Quantity"].sum() if df is not None and "Quantity" in df.columns else 1.0
-    if unidades_totales > 0 and df is not None:
-        precio_actual_calculado = float(df["Sales"].sum() / unidades_totales)
-    else:
-        precio_actual_calculado = 50000.0
+            # Calculamos el precio actual base para los sliders
+            unidades_totales = df["Quantity"].sum() if df is not None and "Quantity" in df.columns else 1.0
+            if unidades_totales > 0 and df is not None:
+                precio_actual_calculado = float(df["Sales"].sum() / unidades_totales)
+            else:
+                precio_actual_calculado = 50000.0
 
-    # Topes dinámicos
-    tope_precio = float(precio_actual_calculado * 5) if precio_actual_calculado > 0 else 1000000.0
-    paso_slider = 1000.0 if codigo_moneda == "COP" else 1.0
-    tope_marketing = 5000000.0 if codigo_moneda == "COP" else 2000.0
+            # Topes dinámicos
+            tope_precio = float(precio_actual_calculado * 5) if precio_actual_calculado > 0 else 1000000.0
+            paso_slider = 1000.0 if codigo_moneda == "COP" else 1.0
+
+            # SLIDERS DE OPERACIÓN
+            col_op1, col_op2 = st.columns(2)
+            with col_op1:
+                nuevo_precio = st.slider(
+                    f"Nuevo precio propuesto ({codigo_moneda})",
+                    min_value=0.0,
+                    max_value=tope_precio,
+                    value=float(precio_actual_calculado * 1.05),
+                    step=paso_slider,
+                    help=f"Precio actual registrado: {formatear_dinero(precio_actual_calculado)}"
+                )
+                cambio_precio = ((nuevo_precio - precio_actual_calculado) / precio_actual_calculado) * 100 if precio_actual_calculado > 0 else 0.0
+                st.caption(f"Precio actual: **{formatear_dinero(precio_actual_calculado)}** ({cambio_precio:+.1f}%)")
+
+            with col_op2:
+                costo_unitario = st.slider(
+                    f"Costo por unidad / proveedor ({codigo_moneda})",
+                    min_value=0.0,
+                    max_value=tope_precio,
+                    value=float(precio_actual_calculado * 0.40),
+                    step=paso_slider,
+                    help="¿Cuánto te cuesta comprar o fabricar cada producto?"
+                )
+                porcentaje_equiv = (costo_unitario / nuevo_precio * 100) if nuevo_precio > 0 else 0
+                st.caption(f"Equivale al **{porcentaje_equiv:.1f}%** del nuevo precio")
+
+            st.divider()
+
+            # RESULTADOS EN TIEMPO REAL
+            st.subheader("📊 Impacto Financiero Directo")
+            try:
+                # Como el marketing se mudó a otra pestaña, aquí simulamos solo la operación (sin anuncios)
+                presupuesto_marketing_cero = 0.0
+                
+                (ventas_historicas, ganancia_historica, ventas_simuladas, ganancia_simulada, costos_historicos, costos_simulados) = simular_escenario_negocio(
+                    df, cambio_precio, presupuesto_marketing_cero, nuevo_precio, costo_unitario
+                )
+                
+                diferencia_ganancia = ganancia_simulada - ganancia_historica
+
+                col_res1, col_res2 = st.columns(2)
+                with col_res1:
+                    st.metric("Ganancia Neta Histórica", formatear_dinero(ganancia_historica))
+                with col_res2:
+                    st.metric("Ganancia Neta Simulada", formatear_dinero(ganancia_simulada), formatear_dinero(diferencia_ganancia))
+                    
+                if ganancia_simulada > ganancia_historica:
+                    st.success(f"🚀 **¡Escenario Positivo!** Con esta configuración generas **{formatear_dinero(diferencia_ganancia)}** extra de ganancia neta pura.")
+                else:
+                    st.error("⚠️ **Cuidado:** Tu margen de rentabilidad bajó. Estás ganando menos dinero que en tu escenario histórico.")
+
+                import plotly.graph_objects as go
+                fig_ganancia = go.Figure(data=[
+                    go.Bar(name="Histórico", x=["Ganancias"], y=[ganancia_historica], marker_color="#4A5568"),
+                    go.Bar(name="Simulado", x=["Ganancias"], y=[ganancia_simulada], marker_color="#00C853" if ganancia_simulada > ganancia_historica else "#D32F2F")
+                ])
+                fig_ganancia.update_layout(barmode='group', height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
+                st.plotly_chart(fig_ganancia, use_container_width=True)
+
+            except Exception as error:
+                st.error(f"Error al simular: {error}")
 
 # 2. CREACIÓN DE LAS PESTAÑAS PRINCIPALES
     tab_demo, tab_asistido, tab_pro, tab_marketing = st.tabs([
