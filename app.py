@@ -409,6 +409,12 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
                         labels={"Total_Unidades": "Unidades Vendidas", col_prod: "Producto"}
                     )
                     fig_bottom.update_layout(yaxis={'categoryorder':'total descending'}, height=350, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
+                    
+                    # FIX DE TARS: Forzar a que el eje X salte de 1 en 1 si hay pocas ventas
+                    max_bottom = df_bottom5["Total_Unidades"].max()
+                    if max_bottom <= 10:
+                        fig_bottom.update_xaxes(dtick=1)
+                        
                     st.plotly_chart(fig_bottom, use_container_width=True)
             
             # =========================================================
