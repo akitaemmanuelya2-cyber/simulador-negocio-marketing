@@ -307,7 +307,7 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
         "🚀 Modo Pro Ultra (Auditoría)"
     ])
 
-    # ---------------------------------------------------------
+# ---------------------------------------------------------
     # PESTAÑA 1: MODO DEMO
     # ---------------------------------------------------------
     with tab_demo:
@@ -315,10 +315,10 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
         st.write("Hemos cargado una base de datos de ejemplo (Train CSV) para que veas el potencial del simulador al instante. ¡Juega con los controles!")
         
         try:
-            # 1. Cargamos el archivo base (asegúrate de que train.csv esté en la carpeta de tu app)
-            df_demo = pd.read_csv("train.csv")
+            # 1. Cargamos el archivo base (usando train_2.csv que ya subiste)
+            df_demo = pd.read_csv("train_2.csv")
             
-            # 2. Normalización automática (por si acaso)
+            # 2. Normalización automática
             mapeo_columnas_demo = {
                 "ventas": "Sales", "Ventas": "Sales", "monto": "Sales", "Monto": "Sales", 
                 "cantidad": "Quantity", "Cantidad": "Quantity", "unidades": "Quantity", "Units": "Quantity",
@@ -333,37 +333,32 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
             if "Cost" in df_demo.columns:
                 df_demo["Cost"] = df_demo["Cost"] * tasa_cambio
                 
-            # 4. Si el archivo base no tiene cantidad, forzamos un valor para que la demo funcione
+            # 4. Si el archivo base no tiene cantidad, forzamos un valor
             if "Quantity" not in df_demo.columns:
                 df_demo["Quantity"] = 1.0
                 
             # 5. Mostramos un resumen de la base cargada
             st.success(f"✅ ¡Base Demo cargada! ({len(df_demo):,} registros listos para simular).")
-
+            
             # =========================================================
             # 🕵️‍♂️ EL DETECTIVE DE DATOS (RADIOGRAFÍA DEL NEGOCIO)
             # =========================================================
             st.markdown("### 🕵️‍♂️ Radiografía de tu Negocio")
             
-            # Buscamos la columna de productos (en tu train_2.csv suele llamarse 'Product Name' o 'Producto')
             col_prod = "Product Name" if "Product Name" in df_demo.columns else ("Producto" if "Producto" in df_demo.columns else None)
             
             if col_prod:
-                # 1. Agrupamos las ventas y cantidades por producto
                 df_agrupado = df_demo.groupby(col_prod).agg(
                     Total_Ventas=("Sales", "sum"),
                     Total_Unidades=("Quantity", "sum")
                 ).reset_index()
                 
-                # 2. Calculamos el precio unitario promedio de cada producto
                 df_agrupado["Precio_Unitario"] = df_agrupado["Total_Ventas"] / df_agrupado["Total_Unidades"]
                 
-                # 3. Identificamos a los ganadores y perdedores
                 rey = df_agrupado.loc[df_agrupado["Total_Ventas"].idxmax()]
                 hueso = df_agrupado.loc[df_agrupado["Total_Ventas"].idxmin()]
                 mas_caro = df_agrupado.loc[df_agrupado["Precio_Unitario"].idxmax()]
                 
-                # 4. Diseñamos las tarjetas visuales
                 col_det1, col_det2 = st.columns(2)
                 
                 with col_det1:
@@ -372,19 +367,45 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
                     
                 with col_det2:
                     ventas_hueso = hueso['Total_Ventas']
-                    
-                    # El Detective evalúa si literalmente no vendió nada o si vendió muy poco
                     if ventas_hueso == 0:
                         st.warning(f"💀 **El Hueso (Cero ventas):**\n\n*{hueso[col_prod]}*\n\nGeneró: **$ 0 {codigo_moneda}**\n\n(¡Literalmente no vendió nada! Urgente planear una estrategia o sacarlo del inventario).")
                     else:
                         st.warning(f"💀 **El Hueso (Menos ingresos):**\n\n*{hueso[col_prod]}*\n\nGeneró: **{formatear_dinero(ventas_hueso)}**\n\n(Es el que menos dinero trajo de la lista. ¡Considera una promoción para sacarlo!)")
                     
-                    # Para el más económico, evitamos los que puedan tener precio 0 por error de digitación en el CSV
                     df_baratos = df_agrupado[df_agrupado["Precio_Unitario"] > 0]
                     if not df_baratos.empty:
                         mas_barato = df_baratos.loc[df_baratos["Precio_Unitario"].idxmin()]
                         st.error(f"🏷️ **El más económico:**\n\n*{mas_barato[col_prod]}*\n\nPrecio aprox: **{formatear_dinero(mas_barato['Precio_Unitario'])}**")
+                
+                # =========================================================
+                # 📊 TABLERO VISUAL DE RENDIMIENTO (¡LOS NUEVOS GRÁFICOS!)
+                # =========================================================
+                st.markdown("### 📊 Tablero de Rendimiento")
+                
+                import plotly.express as px
+                
+                col_g1, col_g2 = st.columns(2)
+                
+                with col_g1:
+                    df_top5 = df_agrupado.sort_values(by="Total_Ventas", ascending=False).head(5)
+                    fig_top = px.bar(
+                        df_top5, x="Total_Ventas", y=col_prod, orientation='h', 
+                        title="🏆 Top 5: Los Motores del Negocio",
+                        color_discrete_sequence=["#00C853"]
+                    )
+                    fig_top.update_layout(yaxis={'categoryorder':'total ascending'}, height=350, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
+                    st.plotly_chart(fig_top, use_container_width=True)
                     
+                with col_g2:
+                    df_bottom5 = df_agrupado.sort_values(by="Total_Ventas", ascending=True).head(5)
+                    fig_bottom = px.bar(
+                        df_bottom5, x="Total_Ventas", y=col_prod, orientation='h', 
+                        title="💀 Bottom 5: Los que están estancados",
+                        color_discrete_sequence=["#D32F2F"]
+                    )
+                    fig_bottom.update_layout(yaxis={'categoryorder':'total descending'}, height=350, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
+                    st.plotly_chart(fig_bottom, use_container_width=True)
+
             else:
                 st.write("💡 *El escáner no detectó una columna de nombres de productos para hacer la auditoría.*")
             
@@ -405,9 +426,8 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
                 )
             
             st.divider()
-            # =========================================================
             
-            # Extraemos las métricas para pasarlas a la sección 2 (Diseña tu escenario)
+            # Extraemos las métricas para pasarlas a la sección de simulación
             ventas_historicas = df_demo["Sales"].sum()
             unidades_totales = df_demo["Quantity"].sum()
             
