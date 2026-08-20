@@ -582,282 +582,134 @@ if df is not None:
 
 
 # ========================================================
-    # 2. PARÁMETROS DEL ESCENARIO (AHORA CON SLIDERS)
+    # 🕹️ PANEL DE SIMULACIÓN (NUEVAS PESTAÑAS ESTRATÉGICAS)
     # ========================================================
-    st.header("2. Diseña tu escenario")
+    st.header("🕹️ Panel de Simulación Estratégica")
+    st.write("Ahora que el detective revisó tu pasado, vamos a diseñar tu futuro paso a paso.")
 
-    # Calculamos el precio actual base
+    # Calculamos el precio actual base para los sliders
     unidades_totales = df["Quantity"].sum() if df is not None and "Quantity" in df.columns else 1.0
     if unidades_totales > 0 and df is not None:
         precio_actual_calculado = float(df["Sales"].sum() / unidades_totales)
     else:
         precio_actual_calculado = 50000.0
 
-    # Definimos topes dinámicos para las barras según la moneda y el precio
+    # Topes dinámicos
     tope_precio = float(precio_actual_calculado * 5) if precio_actual_calculado > 0 else 1000000.0
     paso_slider = 1000.0 if codigo_moneda == "COP" else 1.0
     tope_marketing = 5000000.0 if codigo_moneda == "COP" else 2000.0
 
-    col1, col2, col3 = st.columns(3)
+    # CREAMOS LAS 3 PESTAÑAS DE ACCIÓN
+    tab_operacion, tab_mkt, tab_resultados = st.tabs([
+        "⚙️ 1. Precios y Costos", 
+        "🚀 2. Estrategia Marketing", 
+        "📊 3. Impacto Final"
+    ])
 
-    with col1:
-        nuevo_precio = st.slider(
-            f"Nuevo precio propuesto ({codigo_moneda})",
-            min_value=0.0,
-            max_value=tope_precio,
-            value=float(precio_actual_calculado * 1.05),
-            step=paso_slider,
-            help=f"Precio actual registrado: {formatear_dinero(precio_actual_calculado)}"
-        )
+    # ---------------------------------------------------------
+    # PESTAÑA 1: OPERACIÓN (PRECIOS Y COSTOS)
+    # ---------------------------------------------------------
+    with tab_operacion:
+        st.subheader("1. Ajusta tu modelo operativo")
+        st.write("Define a cómo vas a vender y cuánto te cuesta producir.")
+        
+        col_op1, col_op2 = st.columns(2)
+        with col_op1:
+            nuevo_precio = st.slider(
+                f"Nuevo precio propuesto ({codigo_moneda})",
+                min_value=0.0,
+                max_value=tope_precio,
+                value=float(precio_actual_calculado * 1.05),
+                step=paso_slider,
+                help=f"Precio actual registrado: {formatear_dinero(precio_actual_calculado)}"
+            )
+            cambio_precio = ((nuevo_precio - precio_actual_calculado) / precio_actual_calculado) * 100 if precio_actual_calculado > 0 else 0.0
+            st.caption(f"Precio actual: **{formatear_dinero(precio_actual_calculado)}** ({cambio_precio:+.1f}%)")
 
-        if precio_actual_calculado > 0:
-            cambio_precio = ((nuevo_precio - precio_actual_calculado) / precio_actual_calculado) * 100
-        else:
-            cambio_precio = 0.0
+        with col_op2:
+            costo_unitario = st.slider(
+                f"Costo por unidad / proveedor ({codigo_moneda})",
+                min_value=0.0,
+                max_value=tope_precio,
+                value=float(precio_actual_calculado * 0.40),
+                step=paso_slider,
+                help="¿Cuánto te cuesta comprar o fabricar cada producto?"
+            )
+            porcentaje_equiv = (costo_unitario / nuevo_precio * 100) if nuevo_precio > 0 else 0
+            st.caption(f"Equivale al **{porcentaje_equiv:.1f}%** del nuevo precio")
 
-        st.caption(f"Precio actual: **{formatear_dinero(precio_actual_calculado)}** ({cambio_precio:+.1f}%)")
-
-    with col2:
+    # ---------------------------------------------------------
+    # PESTAÑA 2: MARKETING Y PUBLICIDAD
+    # ---------------------------------------------------------
+    with tab_mkt:
+        st.subheader("2. Inyección de Capital para Anuncios")
+        st.write("Una vez ajustados tus costos, decide cuánto quieres invertir en publicidad para atraer nuevos clientes.")
+        
         presupuesto_marketing = st.slider(
             f"Presupuesto para publicidad ({codigo_moneda})",
             min_value=0.0,
             max_value=tope_marketing,
             value=float(50000.0 if codigo_moneda == "COP" else 50.0),
-            step=paso_slider * 10,  # Saltos un poco más grandes para marketing
-            help="Desliza para ajustar tu inversión en anuncios."
+            step=paso_slider * 10
         )
 
-    with col3:
-        costo_unitario = st.slider(
-            f"Costo por unidad / proveedor ({codigo_moneda})",
-            min_value=0.0,
-            max_value=tope_precio,
-            value=float(precio_actual_calculado * 0.40),
-            step=paso_slider,
-            help="¿Cuánto te cuesta comprar o fabricar cada producto?"
-        )
+        (inversion_ig, inversion_fb, inversion_tk, inversion_gg, clientes_nuevos) = optimizar_marketing(presupuesto_marketing, nuevo_precio)
+        
+        if presupuesto_marketing > 0:
+            col_grafico, col_metrica = st.columns([1.5, 1])
+            with col_grafico:
+                import plotly.graph_objects as go
+                canales = ["Instagram", "Facebook", "TikTok", "Google"]
+                valores = [inversion_ig, inversion_fb, inversion_tk, inversion_gg]
+                colores = ["#E1306C", "#1877F2", "#00F2FE", "#EA4335"]
+                
+                fig_mkt = go.Figure(data=[go.Pie(labels=canales, values=valores, hole=0.5, marker_colors=colores)])
+                fig_mkt.update_layout(height=280, margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
+                st.plotly_chart(fig_mkt, use_container_width=True)
+                
+            with col_metrica:
+                st.metric("🎯 Clientes nuevos estimados", f"+{clientes_nuevos}")
+                costo_por_cliente = presupuesto_marketing / clientes_nuevos if clientes_nuevos > 0 else 0
+                st.success(f"Traer 1 cliente te cuesta aprox. **{formatear_dinero(costo_por_cliente)}**")
+        else:
+            st.warning("⚠️ Mueve la barra de presupuesto para ver la estrategia de medios.")
 
-        porcentaje_equiv = (costo_unitario / nuevo_precio * 100) if nuevo_precio > 0 else 0
-        st.caption(f"Equivale al **{porcentaje_equiv:.1f}%** del nuevo precio")
-
-    st.divider()
-
-    # ========================================================
-    # SIMULACIÓN Y RESULTADOS
-    # ========================================================
-
-    try:
-        (
-            ventas_historicas,
-            ganancia_historica,
-            ventas_simuladas,
-            ganancia_simulada,
-            costos_historicos,
-            costos_simulados
-        ) = simular_escenario_negocio(
-            df,
-            cambio_precio,
-            presupuesto_marketing,
-            nuevo_precio_unitario=nuevo_precio,
-            costo_unitario=costo_unitario
-        )
-
-        # Limpiamos espacios para que el Markdown de Streamlit aplique la negrita correctamente
-        texto_antes = formatear_dinero(costos_historicos).strip()
-        texto_despues = formatear_dinero(costos_simulados).strip()
-
-        st.info(
-            f"📦 **Inversión en Proveedores o Elaboración:** "
-            f"**Antes: {texto_antes} ➔ Después: {texto_despues}**"
-        )
-        # Calculamos diferencias
-        diferencia_ventas = ventas_simuladas - ventas_historicas
-        diferencia_ganancia = ganancia_simulada - ganancia_historica
-
-        st.header("3. Resultados")
-
-        col_res1, col_res2, col_res3, col_res4 = st.columns(4)
-
-        with col_res1:
-            st.metric("Valor total en ventas", formatear_dinero(ventas_historicas))
-
-        with col_res2:
-            st.metric("Valor total en ventas simuladas", formatear_dinero(ventas_simuladas), formatear_dinero(diferencia_ventas))
-
-        with col_res3:
-            st.metric("Ganancia neta histórica", formatear_dinero(ganancia_historica),
-            help="Valor total de ganancia restando el costo de proveedor o elaboración"
-                     )              
-
-        with col_res4:
-            st.metric("Ganancia neta simulada", formatear_dinero(ganancia_simulada), formatear_dinero(diferencia_ganancia),
-            help="Valor total de ganancia restando el costo de proveedor o elaboración con la simulación"
-                     )
-
-    except Exception as error:
-        st.error(f"Ocurrió un inconveniente al simular los datos: {error}")
-
-    # ========================================================
-    # 4. RECOMENDACIÓN DE INVERSIÓN EN MARKETING
-    # ========================================================
-
-    st.header("4. Recomendación de inversión en publicidad o marketing")
-
-    # 1. Calculamos la distribución sugerida
-    (
-        inversion_ig,
-        inversion_fb,
-        inversion_tk,
-        inversion_gg,
-        clientes_nuevos
-    ) = optimizar_marketing(presupuesto_marketing, nuevo_precio)
-
-    if presupuesto_marketing > 0:
-        st.write(
-            f"Basado en un presupuesto de **{formatear_dinero(presupuesto_marketing)}**, "
-            f"esta es la distribución estratégica sugerida para tus campañas:"
-        )
-
-        # Columna 1: Gráfico visual | Columna 2: Tabla de datos | Columna 3: Resultado de Clientes
-        col_grafico, col_tabla, col_metrica = st.columns([1.2, 1.2, 1])
-
-        with col_grafico:
-            import plotly.graph_objects as go
-
-            canales = ["Instagram Ads", "Facebook Ads", "TikTok Ads", "Google Search"]
-            valores = [inversion_ig, inversion_fb, inversion_tk, inversion_gg]
-            colores = ["#E1306C", "#1877F2", "#00F2FE", "#EA4335"]  # Colores representativos de las marcas
-
-            fig = go.Figure(data=[go.Pie(
-                labels=canales,
-                values=valores,
-                hole=0.5, # Hace que sea un gráfico de dona elegante
-                marker_colors=colores,
-                textinfo="percent",
-                hoverinfo="label+value",
-            )])
-
-            fig.update_layout(
-                showlegend=True,
-                legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5),
-                margin=dict(l=10, r=10, t=10, b=10),
-                height=240,
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="white")
+    # ---------------------------------------------------------
+    # PESTAÑA 3: IMPACTO FINANCIERO (RESULTADOS)
+    # ---------------------------------------------------------
+    with tab_resultados:
+        st.subheader("3. El Veredicto de tu Estrategia")
+        
+        try:
+            (ventas_historicas, ganancia_historica, ventas_simuladas, ganancia_simulada, costos_historicos, costos_simulados) = simular_escenario_negocio(
+                df, cambio_precio, presupuesto_marketing, nuevo_precio, costo_unitario
             )
-
-            st.plotly_chart(fig, use_container_width=True)
-
-        with col_tabla:
-            datos_canales = {
-                "Canal": ["Instagram Ads", "Facebook Ads", "TikTok Ads", "Google Search"],
-                "Inversión": [
-                    formatear_dinero(inversion_ig),
-                    formatear_dinero(inversion_fb),
-                    formatear_dinero(inversion_tk),
-                    formatear_dinero(inversion_gg)
-                ]
-            }
-            st.table(datos_canales)
-
-        with col_metrica:
-            st.metric(
-                label="🎯 Clientes nuevos",
-                value=f"+{clientes_nuevos}",
-                help="Proyección de compradores adicionales estimando un costo por cliente dinámico."
-            )
-
-            costo_por_cliente = presupuesto_marketing / clientes_nuevos if clientes_nuevos > 0 else 0
             
-            st.success(
-                f"💡 **Costo estimado:** Traer 1 cliente te cuesta **{formatear_dinero(costo_por_cliente)}** en publicidad."
-            )
+            diferencia_ventas = ventas_simuladas - ventas_historicas
+            diferencia_ganancia = ganancia_simulada - ganancia_historica
 
-    else:
-        st.warning("⚠️ Ingresa un presupuesto de marketing mayor a $0 en la Sección 2 para ver la recomendación de inversión.")
+            col_res1, col_res2 = st.columns(2)
+            with col_res1:
+                st.metric("Ganancia Neta Histórica", formatear_dinero(ganancia_historica))
+            with col_res2:
+                st.metric("Ganancia Neta Simulada", formatear_dinero(ganancia_simulada), formatear_dinero(diferencia_ganancia))
+                
+            if ganancia_simulada > ganancia_historica:
+                multiplicador = diferencia_ganancia / presupuesto_marketing if presupuesto_marketing > 0 else 0
+                st.success(f"🚀 **¡Escenario Positivo!** Generaste **{formatear_dinero(diferencia_ganancia)}** extra. Multiplicaste tu inversión en anuncios {multiplicador:.1f} veces.")
+            else:
+                st.error("⚠️ **Cuidado:** Tu margen no es suficiente para cubrir los costos o la publicidad. Estás perdiendo dinero.")
 
-    # ========================================================
-    # 5. IMPACTO FINANCIERO
-    # ========================================================
+            st.write("📈 **Comparativa Visual de Ganancias:**")
+            fig_ganancia = go.Figure(data=[
+                go.Bar(name="Histórico", x=["Ganancias"], y=[ganancia_historica], marker_color="#4A5568"),
+                go.Bar(name="Simulado", x=["Ganancias"], y=[ganancia_simulada], marker_color="#00C853" if ganancia_simulada > ganancia_historica else "#D32F2F")
+            ])
+            fig_ganancia.update_layout(barmode='group', height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
+            st.plotly_chart(fig_ganancia, use_container_width=True)
 
-    st.header("5. Impacto financiero")
-    st.write("Comparativa visual entre tu situación actual y el escenario simulado:")
-
-    col_fig1, col_fig2 = st.columns(2)
-
-    with col_fig1:
-        # Gráfico 1: Comparativa de Ventas
-        fig_ventas = go.Figure(data=[
-            go.Bar(
-                x=["Ventas Históricas", "Ventas Simuladas"],
-                y=[ventas_historicas, ventas_simuladas],
-                text=[formatear_dinero(ventas_historicas), formatear_dinero(ventas_simuladas)],
-                textposition="auto",
-                marker_color=["#4A5568", "#00C853"] # Gris actual vs Verde proyección
-            )
-        ])
-
-        fig_ventas.update_layout(
-            title="📈 Comparativa de Ventas Totales",
-            yaxis_title=codigo_moneda,
-            height=300,
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="white")
-        )
-
-        st.plotly_chart(fig_ventas, use_container_width=True)
-
-    with col_fig2:
-        # Gráfico 2: Comparativa de Ganancia Neta
-        fig_ganancia = go.Figure(data=[
-            go.Bar(
-                x=["Ganancia Histórica", "Ganancia Simulada"],
-                y=[ganancia_historica, ganancia_simulada],
-                text=[formatear_dinero(ganancia_historica), formatear_dinero(ganancia_simulada)],
-                textposition="auto",
-                marker_color=["#4A5568", "#29B6F6"] # Gris actual vs Azul proyección
-            )
-        ])
-
-        fig_ganancia.update_layout(
-            title="💰 Comparativa de Ganancia Neta",
-            yaxis_title=codigo_moneda,
-            height=300,
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="white")
-        )
-
-        st.plotly_chart(fig_ganancia, use_container_width=True)
-
-# Mensaje de conclusión o veredicto del negocio
-    diferencia_ganancia = ganancia_simulada - ganancia_historica
-
-    if presupuesto_marketing > 0:
-        multiplicador = diferencia_ganancia / presupuesto_marketing
-    else:
-        multiplicador = 0
-
-    # Limpiamos espacios alrededor de las cadenas formateadas
-    texto_presupuesto = formatear_dinero(presupuesto_marketing).strip()
-    texto_ganancia_extra = formatear_dinero(diferencia_ganancia).strip()
-    ganancia_por_unidad = formatear_dinero(multiplicador).strip()
-
-    if ganancia_simulada > ganancia_historica:
-        st.success(
-            f"🚀 **¡Escenario Positivo!** "
-            f"Al invertir **{texto_presupuesto}, obtienes {texto_ganancia_extra}** de ganancia limpia adicional. "
-            f"Esto significa que por cada **1 {codigo_moneda}** que inviertes en anuncios, te quedan **{ganancia_por_unidad}** libres "
-            f"(multiplicas tu inversión **{multiplicador:.1f} veces**)."
-        )
-    else:
-        st.warning(
-            "⚠️ **Ojo con los números:** El aumento en costos o publicidad supera el margen generado. "
-            "Ajusta el precio o reduce el presupuesto de marketing para asegurar ganancias."
-        )
-
+        except Exception as error:
+            st.error(f"Error al simular: {error}")
 # ========================================================
     # DETALLE DE DATOS UTILIZADOS EN EL ANÁLISIS
     # ========================================================
