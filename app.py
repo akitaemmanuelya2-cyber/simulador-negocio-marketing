@@ -377,7 +377,7 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
                         mas_barato = df_baratos.loc[df_baratos["Precio_Unitario"].idxmin()]
                         st.error(f"🏷️ **El más económico:**\n\n*{mas_barato[col_prod]}*\n\nPrecio aprox: **{formatear_dinero(mas_barato['Precio_Unitario'])}**")
                 
-# =========================================================
+                # =========================================================
                 # 📊 TABLERO VISUAL DE RENDIMIENTO (ACTUALIZADO A VOLUMEN)
                 # =========================================================
                 st.markdown("### 📊 Tablero de Rendimiento (Volumen de Ventas)")
@@ -609,7 +609,7 @@ if df is not None:
         )
 
 
-# ========================================================
+    # ========================================================
     # 🕹️ PANEL DE SIMULACIÓN (NUEVAS PESTAÑAS ESTRATÉGICAS)
     # ========================================================
     st.header("🕹️ Panel de Simulación Estratégica")
@@ -627,11 +627,12 @@ if df is not None:
     paso_slider = 1000.0 if codigo_moneda == "COP" else 1.0
     tope_marketing = 5000000.0 if codigo_moneda == "COP" else 2000.0
 
-    # CREAMOS LAS 3 PESTAÑAS DE ACCIÓN
-    tab_operacion, tab_mkt, tab_resultados = st.tabs([
-        "⚙️ 1. Precios y Costos", 
-        "🚀 2. Estrategia Marketing", 
-        "📊 3. Impacto Final"
+# 2. CREACIÓN DE LAS PESTAÑAS PRINCIPALES
+    tab_demo, tab_asistido, tab_pro, tab_marketing = st.tabs([
+        "🎮 Modo Demo", 
+        "🤝 Modo Asistido", 
+        "🚀 Modo Pro Ultra",
+        "🎯 Estrategia Marketing"
     ])
 
     # ---------------------------------------------------------
