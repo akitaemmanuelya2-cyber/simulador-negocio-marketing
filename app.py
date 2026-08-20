@@ -582,26 +582,31 @@ if df is not None:
 
 
 # ========================================================
-    # 2. PARÁMETROS DEL ESCENARIO
+    # 2. PARÁMETROS DEL ESCENARIO (AHORA CON SLIDERS)
     # ========================================================
-
     st.header("2. Diseña tu escenario")
 
-    unidades_totales = df["Quantity"].sum()
-    if unidades_totales > 0:
+    # Calculamos el precio actual base
+    unidades_totales = df["Quantity"].sum() if df is not None and "Quantity" in df.columns else 1.0
+    if unidades_totales > 0 and df is not None:
         precio_actual_calculado = float(df["Sales"].sum() / unidades_totales)
     else:
         precio_actual_calculado = 50000.0
 
+    # Definimos topes dinámicos para las barras según la moneda y el precio
+    tope_precio = float(precio_actual_calculado * 5) if precio_actual_calculado > 0 else 1000000.0
+    paso_slider = 1000.0 if codigo_moneda == "COP" else 1.0
+    tope_marketing = 5000000.0 if codigo_moneda == "COP" else 2000.0
+
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        nuevo_precio = st.number_input(
+        nuevo_precio = st.slider(
             f"Nuevo precio propuesto ({codigo_moneda})",
             min_value=0.0,
+            max_value=tope_precio,
             value=float(precio_actual_calculado * 1.05),
-            step=1000.0,
-            format="%.0f",
+            step=paso_slider,
             help=f"Precio actual registrado: {formatear_dinero(precio_actual_calculado)}"
         )
 
@@ -613,22 +618,22 @@ if df is not None:
         st.caption(f"Precio actual: **{formatear_dinero(precio_actual_calculado)}** ({cambio_precio:+.1f}%)")
 
     with col2:
-        presupuesto_marketing = st.number_input(
-            f"Presupuesto para publicidad o marketing ({codigo_moneda})",
+        presupuesto_marketing = st.slider(
+            f"Presupuesto para publicidad ({codigo_moneda})",
             min_value=0.0,
-            value=50000.0,
-            step=10000.0,
-            format="%.0f",
-            help="¿Cuánto quiero invertir en publicidad?"
+            max_value=tope_marketing,
+            value=float(50000.0 if codigo_moneda == "COP" else 50.0),
+            step=paso_slider * 10,  # Saltos un poco más grandes para marketing
+            help="Desliza para ajustar tu inversión en anuncios."
         )
 
     with col3:
-        costo_unitario = st.number_input(
+        costo_unitario = st.slider(
             f"Costo por unidad / proveedor ({codigo_moneda})",
             min_value=0.0,
+            max_value=tope_precio,
             value=float(precio_actual_calculado * 0.40),
-            step=1000.0,
-            format="%.0f",
+            step=paso_slider,
             help="¿Cuánto te cuesta comprar o fabricar cada producto?"
         )
 
