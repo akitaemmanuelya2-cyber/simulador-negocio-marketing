@@ -130,41 +130,67 @@ else:
     costo_unitario = 0.0
     codigo_moneda = "COP" 
 
-    # ========================================================
-    # SECCIÓN 1: MODO ASISTIDO (AHORA CON EL DETECTIVE INTEGRADO)
+# ========================================================
+    # SECCIÓN 1: MODO ASISTIDO (TU MINI-EXCEL)
     # ========================================================
     if menu_seleccionado == "🤝 Modo Asistido":
-        st.subheader("🤝 Modo Asistido: Sube tus datos y descubre la magia")
-        st.write("Sube tu archivo CSV de ventas. Nuestro Detective lo analizará y preparará tu simulador al instante.")
+        st.subheader("🤝 Modo Asistido: Tu lienzo en blanco")
+        st.write("Completa los datos de tus productos directamente aquí o descarga la plantilla para llenarla en tu computador y subirla después.")
+
+        # 1. Definimos las columnas maestras de Tars
+        columnas_base = {
+            "Producto": ["Ejemplo: Camiseta Negra", "", ""],
+            "Cantidad Vendida": [100, 0, 0],
+            "Precio de Venta": [50000.0, 0.0, 0.0],
+            "Costo Proveedor": [20000.0, 0.0, 0.0]
+        }
+        df_plantilla = pd.DataFrame(columnas_base)
+
+        col_descarga, col_subida = st.columns(2)
         
-        archivo_subido = st.file_uploader("📂 Sube tu archivo CSV aquí", type=["csv"])
+        with col_descarga:
+            # Botón para descargar la plantilla limpia
+            csv_plantilla = df_plantilla.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Descargar Plantilla CSV",
+                data=csv_plantilla,
+                file_name="plantilla_simulador.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+            
+        with col_subida:
+            archivo_subido = st.file_uploader("📂 O sube tu archivo ya lleno", type=["csv"], label_visibility="collapsed")
+
+        st.divider()
+
+        # 2. El editor interactivo en pantalla
+        st.markdown("### 📝 Llena tus datos en línea")
+        st.caption("Haz doble clic en cualquier celda para editar. Puedes agregar nuevas filas en la parte inferior.")
         
+        # Si sube un archivo lo mostramos, si no, mostramos la plantilla para editar
         if archivo_subido is not None:
-            try:
-                # 1. Cargamos el archivo del usuario
-                df_usuario = pd.read_csv(archivo_subido)
-                
-                # 2. Normalización automática de columnas
-                mapeo_columnas = {
-                    "ventas": "Sales", "Ventas": "Sales", "monto": "Sales", "Monto": "Sales", 
-                    "cantidad": "Quantity", "Cantidad": "Quantity", "unidades": "Quantity", "Units": "Quantity",
-                    "costo": "Cost", "Costo": "Cost"
-                }
-                df_usuario = df_usuario.rename(columns=mapeo_columnas)
-                
-                # Simulamos configuración de moneda por ahora (puedes agregar el selector después)
-                tasa_cambio = 1.0 
-                if "Sales" in df_usuario.columns:
-                    df_usuario["Sales"] = pd.to_numeric(df_usuario["Sales"], errors='coerce').fillna(0) * tasa_cambio
-                if "Quantity" not in df_usuario.columns:
-                    df_usuario["Quantity"] = 1.0
-                else:
-                    df_usuario["Quantity"] = pd.to_numeric(df_usuario["Quantity"], errors='coerce').fillna(1)
-                    
-                st.success(f"✅ ¡Archivo procesado con éxito! ({len(df_usuario):,} registros encontrados).")
-                
-                def formatear_dinero_app(valor):
-                    return f"$ {valor:,.0f} COP"
+            df_base = pd.read_csv(archivo_subido)
+        else:
+            df_base = df_plantilla
+
+        # La magia interactiva de Streamlit
+        df_usuario = st.data_editor(
+            df_base,
+            num_rows="dynamic", # Permite añadir o borrar filas
+            use_container_width=True,
+            key="editor_datos"
+        )
+        
+        # 3. Validación básica para no simular datos vacíos
+        primer_producto = str(df_usuario["Producto"].iloc[0])
+        datos_listos = primer_producto != "" and primer_producto != "Ejemplo: Camiseta Negra"
+
+        if datos_listos:
+            st.success("✅ ¡Datos detectados! El motor de simulación está listo.")
+            # >>> AQUÍ PEGAREMOS LUEGO EL DETECTIVE Y EL SIMULADOR <<<
+        else:
+            st.info("👆 Empieza a escribir tus productos reales en la tabla para activar el análisis.")
                 
                 # =========================================================
                 # EL DETECTIVE DE DATOS (AHORA FUNCIONA CON EL CSV DEL USUARIO)
