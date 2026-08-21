@@ -15,6 +15,72 @@ st.write(
     "para estimar su impacto en ventas y ganancias."
 )
 
+# ============================================================
+# 🏠 PORTADA: EL LOBBY DE LA APLICACIÓN
+# ============================================================
+
+st.title("📊 Simulador de Negocio y Marketing")
+st.markdown("### Bienvenido a tu Centro de Mando Estratégico")
+st.write(
+    "Antes de arriesgar tu capital en el mundo real, simula tus decisiones aquí. "
+    "Audita tu inventario, ajusta tus precios, controla tus costos y planifica "
+    "tu inversión publicitaria como un verdadero analista de datos."
+)
+
+st.divider()
+
+# --- PRESENTACIÓN DE LOS 4 PILARES ---
+st.markdown("#### 🚀 ¿Qué puedes hacer en esta plataforma?")
+
+col_p1, col_p2, col_p3, col_p4 = st.columns(4)
+
+with col_p1:
+    st.info("**🎮 Modo Demo**\n\nJuega con una base de datos precargada y descubre el potencial del simulador en segundos sin subir nada.")
+with col_p2:
+    st.success("**🤝 Modo Asistido**\n\nSube un archivo de ventas básico y usa nuestra tabla inteligente para completar los costos que te falten.")
+with col_p3:
+    st.warning("**🚀 Modo Pro Ultra**\n\nConecta tu inventario completo y deja que nuestro Detective de Datos haga una auditoría profunda.")
+with col_p4:
+    st.error("**🎯 Estrategia MKT**\n\nSimula inversiones en Instagram, Facebook y TikTok, y calcula cuántos clientes nuevos puedes atraer.")
+
+st.divider()
+
+# ============================================================
+# 🚪 EL PORTAL DE ENTRADA (CONFIGURACIÓN INICIAL)
+# ============================================================
+st.markdown("### 🚪 ¿Cómo quieres empezar hoy?")
+
+# Aquí va la configuración de moneda que ya teníamos
+monedas = {
+    "🇨🇴 COP - Peso colombiano": {"codigo": "COP", "simbolo": "$", "decimales": 0},
+    "🇺🇸 USD - Dólar estadounidense": {"codigo": "USD", "simbolo": "$", "decimales": 2},
+    "🇪🇺 EUR - Euro": {"codigo": "EUR", "simbolo": "€", "decimales": 2}
+}
+
+col_moneda, col_modo = st.columns([1, 2])
+
+with col_moneda:
+    moneda_seleccionada = st.selectbox("1. Selecciona tu moneda", list(monedas.keys()))
+    moneda = monedas[moneda_seleccionada]
+    codigo_moneda = moneda["codigo"]
+    simbolo_moneda = moneda["simbolo"]
+    decimales_moneda = moneda["decimales"]
+
+def formatear_dinero(valor):
+    if decimales_moneda == 0:
+        return f"{simbolo_moneda} {valor:,.0f} {codigo_moneda}"
+    else:
+        return f"{simbolo_moneda} {valor:,.2f} {codigo_moneda}"
+
+with col_modo:
+    modo_trabajo = st.radio(
+        "2. Elige tu punto de partida:",
+        ["Tengo una base de datos (CSV)", "No tengo base de datos (Ingresar manual)"],
+        horizontal=True
+    )
+
+st.divider()
+
 
 # ============================================================
 # FUNCIONES DEL MODELO
