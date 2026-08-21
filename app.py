@@ -10,33 +10,51 @@ st.set_page_config(
 )
 
 # ============================================================
-# 🎨 INYECCIÓN DE CSS (DISEÑO PREMIUM Y LIMPIEZA)
+# 🎨 INYECCIÓN DE CSS (DISEÑO WEB EJECUTIVO Y PROFESIONAL)
 # ============================================================
 estilos_css = """
 <style>
-    /* 1. Ocultar los elementos predeterminados de Streamlit para que parezca app propia */
+    /* 1. Ocultar elementos predeterminados de Streamlit */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* 2. Personalizar los botones principales con esquinas redondeadas */
+    /* 2. Fondo general con un degradado elegante basado en tu paleta (Chinese Black a Jet) */
+    .stApp {
+        background: linear-gradient(135deg, #0C1519 0%, #1A2228 50%, #252A30 100%);
+        color: #FAFAFA;
+    }
+    
+    /* 3. Estilo de tarjetas corporativas (Contenedores con bordes de Antique Brass) */
+    div.stMarkdownContainer, div.css-1r7slds {
+        background-color: transparent;
+    }
+    
+    /* 4. Botones principales estilizados con tu color Antique Brass */
     div.stButton > button {
         border-radius: 8px;
         font-weight: bold;
+        background-color: #3A3534;
+        color: #FAFAFA;
         border: 1px solid #CF9D7B;
         transition: all 0.3s ease;
     }
     
-    /* 3. Efecto de luz (hover) al pasar el cursor sobre los botones */
+    /* 5. Efecto de luz y elevación (hover) al pasar el cursor */
     div.stButton > button:hover {
+        background-color: #CF9D7B;
+        color: #0C1519;
         transform: translateY(-2px);
-        box-shadow: 0px 6px 15px rgba(207, 157, 123, 0.3);
+        box-shadow: 0px 6px 20px rgba(207, 157, 123, 0.4);
         border-color: #FAFAFA;
     }
     
-    /* 4. Estilizar las tarjetas o contenedores para que combinen con la paleta */
-    div.stMarkdown {
-        letter-spacing: 0.2px;
+    /* 6. Estilo para los selectores y pestañas */
+    .stRadio > div {
+        background-color: #162127;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #3A3534;
     }
 </style>
 """
