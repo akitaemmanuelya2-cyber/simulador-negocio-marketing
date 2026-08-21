@@ -81,14 +81,13 @@ if not st.session_state['en_simulador']:
 
     st.markdown("#### 🚀 ¿Qué puedes hacer en esta plataforma?")
 
-    # Ahora solo tenemos 3 columnas maestras
     col_p1, col_p2, col_p3 = st.columns(3)
 
     with col_p1:
-        st.success("🤝 **Modo Asistido**\n\nSube un archivo de ventas y usa nuestra tabla inteligente para rellenar costos, auditar productos y simular.")
+        st.success("🤝 **Modo Asistido**\n\nUsa nuestra tabla inteligente para ingresar tus costos o descarga una plantilla para rellenar.")
         st.button("Entrar al Asistido", on_click=ir_a_seccion, args=("🤝 Modo Asistido",), use_container_width=True)
     with col_p2:
-        st.warning("🚀 **Modo Pro Ultra**\n\nConecta tu inventario completo y obtén una radiografía profunda automatizada.")
+        st.warning("🚀 **Modo Pro Ultra**\n\nConecta tu inventario histórico completo y obtén una radiografía profunda automatizada.")
         st.button("Entrar al Pro", on_click=ir_a_seccion, args=("🚀 Modo Pro Ultra",), use_container_width=True)
     with col_p3:
         st.error("🎯 **Estrategia MKT**\n\nSimula inversiones en redes sociales y calcula clientes nuevos al instante.")
@@ -107,7 +106,6 @@ if not st.session_state['en_simulador']:
 # ⚙️ PANTALLA 2: LA MAQUINARIA (APP PRINCIPAL)
 # ============================================================
 else:
-    # EL NUEVO MENÚ DE NAVEGACIÓN SUPERIOR
     st.markdown("### Menú de Navegación")
     col_home, col_menu = st.columns([1.5, 8.5])
     
@@ -115,7 +113,6 @@ else:
         st.button("🏠 Volver al Home", on_click=volver_portada, use_container_width=True, type="secondary")
         
     with col_menu:
-        # Quitamos la opción Demo del menú superior
         opciones_menu = ["🤝 Modo Asistido", "🚀 Modo Pro Ultra", "🎯 Estrategia Marketing"]
         idx = opciones_menu.index(st.session_state['seccion_activa']) if st.session_state['seccion_activa'] in opciones_menu else 0
         menu_seleccionado = st.radio("Secciones", opciones_menu, index=idx, horizontal=True, label_visibility="collapsed")
@@ -130,14 +127,13 @@ else:
     costo_unitario = 0.0
     codigo_moneda = "COP" 
 
-# ========================================================
-    # SECCIÓN 1: MODO ASISTIDO (TU MINI-EXCEL)
+    # ========================================================
+    # SECCIÓN 1: MODO ASISTIDO (EL MINI-EXCEL)
     # ========================================================
     if menu_seleccionado == "🤝 Modo Asistido":
         st.subheader("🤝 Modo Asistido: Tu lienzo en blanco")
         st.write("Completa los datos de tus productos directamente aquí o descarga la plantilla para llenarla en tu computador y subirla después.")
 
-        # 1. Definimos las columnas maestras de Tars
         columnas_base = {
             "Producto": ["Ejemplo: Camiseta Negra", "", ""],
             "Cantidad Vendida": [100, 0, 0],
@@ -149,7 +145,6 @@ else:
         col_descarga, col_subida = st.columns(2)
         
         with col_descarga:
-            # Botón para descargar la plantilla limpia
             csv_plantilla = df_plantilla.to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="📥 Descargar Plantilla CSV",
@@ -164,42 +159,68 @@ else:
 
         st.divider()
 
-        # 2. El editor interactivo en pantalla
         st.markdown("### 📝 Llena tus datos en línea")
         st.caption("Haz doble clic en cualquier celda para editar. Puedes agregar nuevas filas en la parte inferior.")
         
-        # Si sube un archivo lo mostramos, si no, mostramos la plantilla para editar
         if archivo_subido is not None:
             df_base = pd.read_csv(archivo_subido)
         else:
             df_base = df_plantilla
 
-        # La magia interactiva de Streamlit
         df_usuario = st.data_editor(
             df_base,
-            num_rows="dynamic", # Permite añadir o borrar filas
+            num_rows="dynamic", 
             use_container_width=True,
             key="editor_datos"
         )
         
-        # 3. Validación básica para no simular datos vacíos
         primer_producto = str(df_usuario["Producto"].iloc[0])
         datos_listos = primer_producto != "" and primer_producto != "Ejemplo: Camiseta Negra"
 
         if datos_listos:
             st.success("✅ ¡Datos detectados! El motor de simulación está listo.")
-            # >>> AQUÍ PEGAREMOS LUEGO EL DETECTIVE Y EL SIMULADOR <<<
+            # Aquí inyectaremos el simulador más adelante
         else:
             st.info("👆 Empieza a escribir tus productos reales en la tabla para activar el análisis.")
+
+    # ========================================================
+    # SECCIÓN 2: MODO PRO ULTRA (EL DETECTIVE Y CSV COMPLETO)
+    # ========================================================
+    elif menu_seleccionado == "🚀 Modo Pro Ultra":
+        st.subheader("🚀 Modo Pro Ultra: El Detective de Negocios")
+        st.write("Sube tu base de datos histórica completa. Nuestro motor auditará tu catálogo, detectará fugas de capital y te permitirá simular escenarios complejos.")
+        
+        archivo_pro = st.file_uploader("📂 Sube tu archivo CSV histórico aquí", type=["csv"], key="uploader_pro")
+        
+        if archivo_pro is not None:
+            try:
+                df_pro = pd.read_csv(archivo_pro)
                 
-                # =========================================================
-                # EL DETECTIVE DE DATOS (AHORA FUNCIONA CON EL CSV DEL USUARIO)
-                # =========================================================
+                mapeo_columnas = {
+                    "ventas": "Sales", "Ventas": "Sales", "monto": "Sales", "Monto": "Sales", 
+                    "cantidad": "Quantity", "Cantidad": "Quantity", "unidades": "Quantity", "Units": "Quantity",
+                    "costo": "Cost", "Costo": "Cost"
+                }
+                df_pro = df_pro.rename(columns=mapeo_columnas)
+                
+                tasa_cambio = 1.0 
+                if "Sales" in df_pro.columns:
+                    df_pro["Sales"] = pd.to_numeric(df_pro["Sales"], errors='coerce').fillna(0) * tasa_cambio
+                if "Quantity" not in df_pro.columns:
+                    df_pro["Quantity"] = 1.0
+                else:
+                    df_pro["Quantity"] = pd.to_numeric(df_pro["Quantity"], errors='coerce').fillna(1)
+                    
+                st.success(f"✅ ¡Base de datos Pro cargada! Analizando {len(df_pro):,} registros...")
+                
+                def formatear_dinero_pro(valor):
+                    return f"$ {valor:,.0f} COP" 
+                
                 st.markdown("### 🕵️‍♂️ Radiografía de tu Negocio")
-                col_prod = "Product Name" if "Product Name" in df_usuario.columns else ("Producto" if "Producto" in df_usuario.columns else None)
+                col_prod = "Product Name" if "Product Name" in df_pro.columns else ("Producto" if "Producto" in df_pro.columns else None)
                 
                 if col_prod:
-                    df_agrupado = df_usuario.groupby(col_prod).agg(
+                    df_agrupado = df_pro.groupby(col_prod).agg(
                         Total_Ventas=("Sales", "sum"), Total_Unidades=("Quantity", "sum")
                     ).reset_index()
                     
@@ -211,18 +232,18 @@ else:
                     
                     col_det1, col_det2 = st.columns(2)
                     with col_det1:
-                        st.info(f"🏆 **El Rey (Más ingresos):**\n\n*{rey[col_prod]}*\n\nGeneró: **{formatear_dinero_app(rey['Total_Ventas'])}**")
-                        st.success(f"💎 **El producto más costoso:**\n\n*{mas_caro[col_prod]}*\n\nPrecio aprox: **{formatear_dinero_app(mas_caro['Precio_Unitario'])}**")
+                        st.info(f"🏆 **El Rey (Más ingresos):**\n\n*{rey[col_prod]}*\n\nGeneró: **{formatear_dinero_pro(rey['Total_Ventas'])}**")
+                        st.success(f"💎 **El producto más costoso:**\n\n*{mas_caro[col_prod]}*\n\nPrecio aprox: **{formatear_dinero_pro(mas_caro['Precio_Unitario'])}**")
                     with col_det2:
                         if hueso['Total_Ventas'] == 0:
                             st.warning(f"💀 **El Hueso (Cero ventas):**\n\n*{hueso[col_prod]}*\n\nGeneró: **$ 0 COP**")
                         else:
-                            st.warning(f"💀 **El Hueso (Menos ingresos):**\n\n*{hueso[col_prod]}*\n\nGeneró: **{formatear_dinero_app(hueso['Total_Ventas'])}**")
+                            st.warning(f"💀 **El Hueso (Menos ingresos):**\n\n*{hueso[col_prod]}*\n\nGeneró: **{formatear_dinero_pro(hueso['Total_Ventas'])}**")
                         
                         df_baratos = df_agrupado[df_agrupado["Precio_Unitario"] > 0]
                         if not df_baratos.empty:
                             mas_barato = df_baratos.loc[df_baratos["Precio_Unitario"].idxmin()]
-                            st.error(f"🏷️ **El más económico:**\n\n*{mas_barato[col_prod]}*\n\nPrecio aprox: **{formatear_dinero_app(mas_barato['Precio_Unitario'])}**")
+                            st.error(f"🏷️ **El más económico:**\n\n*{mas_barato[col_prod]}*\n\nPrecio aprox: **{formatear_dinero_pro(mas_barato['Precio_Unitario'])}**")
                     
                     st.markdown("### 📊 Tablero de Rendimiento (Volumen)")
                     col_g1, col_g2 = st.columns(2)
@@ -243,20 +264,18 @@ else:
                 st.markdown("### 💡 El Veredicto Estratégico")
                 if col_prod and not df_agrupado.empty:
                     st.info(
-                        f"👋 **¡Hola, mi amigo emprendedor!** Aquí tu plan táctico basado en tus propios datos:\n\n"
-                        f"🚀 Tu producto rey (*{rey[col_prod]}*) es una máquina. Prohibido quedarse sin stock.\n\n"
-                        f"💀 Ese *{hueso[col_prod]}* es tu hueso. Liquídalo urgente.\n\n"
-                        f"🏷️ Tienes el *{mas_barato[col_prod]}* como producto gancho. Úsalo en publicidad."
+                        f"👋 **¡Hola, mi amigo emprendedor!** Aquí tu plan táctico basado en tu data histórica:\n\n"
+                        f"🚀 Tu producto rey (*{rey[col_prod]}*) es tu motor principal. ¡Asegura inventario siempre!\n\n"
+                        f"💀 Ese *{hueso[col_prod]}* es tu hueso. Considera armar un combo para rotarlo rápido.\n\n"
+                        f"🏷️ Tu producto más económico (*{mas_barato[col_prod]}*) úsalo en pautas publicitarias para atraer tráfico."
                     )
                 
                 st.divider()
-                df = df_usuario 
 
-                # =========================================================
-                # PANEL DE SIMULACIÓN EN TIEMPO REAL
-                # =========================================================
                 st.header("🕹️ Simulador en Tiempo Real")
+                st.write("Ajusta tus precios y costos globales, y observa el impacto financiero al instante.")
                 
+                df = df_pro 
                 unidades_totales = df["Quantity"].sum()
                 precio_actual_calculado = float(df["Sales"].sum() / unidades_totales) if unidades_totales > 0 else 50000.0
                 tope_precio = float(precio_actual_calculado * 5) if precio_actual_calculado > 0 else 1000000.0
@@ -264,12 +283,12 @@ else:
 
                 col_op1, col_op2 = st.columns(2)
                 with col_op1:
-                    nuevo_precio = st.slider(f"Nuevo precio propuesto (COP)", min_value=0.0, max_value=tope_precio, value=float(precio_actual_calculado * 1.05), step=paso_slider)
+                    nuevo_precio = st.slider("Nuevo precio propuesto (COP)", min_value=0.0, max_value=tope_precio, value=float(precio_actual_calculado * 1.05), step=paso_slider)
                     cambio_precio = ((nuevo_precio - precio_actual_calculado) / precio_actual_calculado) * 100 if precio_actual_calculado > 0 else 0.0
-                    st.caption(f"Precio actual promediado: **{formatear_dinero_app(precio_actual_calculado)}** ({cambio_precio:+.1f}%)")
+                    st.caption(f"Precio actual promediado: **{formatear_dinero_pro(precio_actual_calculado)}** ({cambio_precio:+.1f}%)")
 
                 with col_op2:
-                    costo_unitario = st.slider(f"Costo base por unidad (COP)", min_value=0.0, max_value=tope_precio, value=float(precio_actual_calculado * 0.40), step=paso_slider)
+                    costo_unitario = st.slider("Costo base por unidad (COP)", min_value=0.0, max_value=tope_precio, value=float(precio_actual_calculado * 0.40), step=paso_slider)
                     st.caption(f"Equivale al **{(costo_unitario / nuevo_precio * 100) if nuevo_precio > 0 else 0:.1f}%** del nuevo precio")
 
                 st.divider()
@@ -281,14 +300,14 @@ else:
 
                     col_res1, col_res2 = st.columns(2)
                     with col_res1:
-                        st.metric("Ganancia Neta Histórica", formatear_dinero_app(g_hist))
+                        st.metric("Ganancia Neta Histórica", formatear_dinero_pro(g_hist))
                     with col_res2:
-                        st.metric("Ganancia Neta Simulada", formatear_dinero_app(g_sim), formatear_dinero_app(dif_ganancia))
+                        st.metric("Ganancia Neta Simulada", formatear_dinero_pro(g_sim), formatear_dinero_pro(dif_ganancia))
                         
                     if g_sim > g_hist:
-                        st.success(f"🚀 **¡Escenario Positivo!** Generas **{formatear_dinero_app(dif_ganancia)}** extra.")
+                        st.success(f"🚀 **¡Escenario Positivo!** Con esta proyección generas **{formatear_dinero_pro(dif_ganancia)}** extra.")
                     else:
-                        st.error("⚠️ **Cuidado:** Tu margen bajó. Estás perdiendo dinero frente al escenario histórico.")
+                        st.error("⚠️ **Cuidado:** Tu margen de rentabilidad bajó. Estás perdiendo dinero frente al escenario histórico.")
 
                     fig_ganancia = go.Figure(data=[
                         go.Bar(name="Histórico", x=["Ganancias"], y=[g_hist], marker_color="#4A5568"),
@@ -301,17 +320,9 @@ else:
                     st.error(f"Error al simular: {error}")
 
             except Exception as e:
-                st.error(f"❌ Error al leer el archivo: Asegúrate de que sea un CSV válido. Detalle: {e}")
+                st.error(f"❌ Error al procesar el archivo. Asegúrate de que sea un CSV válido. Detalle: {e}")
         else:
-            st.info("👆 Esperando tu archivo de datos para comenzar la magia...")
-
-    # ========================================================
-    # SECCIÓN 2: MODO PRO ULTRA
-    # ========================================================
-    elif menu_seleccionado == "🚀 Modo Pro Ultra":
-        st.subheader("🚀 El Detective de Negocios (Próximamente)")
-        st.write("Sube tu archivo con el formato completo y obtén una radiografía profunda.")
-        st.info("💡 Herramienta en construcción...")
+            st.info("👆 El motor está apagado. Sube tu CSV histórico para iniciar la auditoría.")
 
     # ========================================================
     # SECCIÓN 3: ESTRATEGIA MARKETING
