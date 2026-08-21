@@ -1,0 +1,15 @@
+[theme]
+# ANTIQUE BRASS: El acento de lujo. Dará vida a tus botones, sliders y elementos interactivos.
+primaryColor = "#CF9D7B"
+
+# CHINESE BLACK: El fondo principal. Profundo, inmersivo y súper elegante.
+backgroundColor = "#0C1519"
+
+# DARK JUNGLE GREEN: Para crear relieve en las tarjetas de información y menús sin romper la oscuridad.
+secondaryBackgroundColor = "#162127"
+
+# TEXTO: Lo mantendremos en un blanco humo o hueso para garantizar que los números de tu negocio se lean perfecto.
+textColor = "#FAFAFA"
+
+# Fuente moderna y limpia
+font = "sans serif"
