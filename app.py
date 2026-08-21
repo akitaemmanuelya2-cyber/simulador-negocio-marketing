@@ -142,7 +142,7 @@ if modo_trabajo == "Tengo una base de datos (CSV)":
         st.write("Hemos cargado una base de datos de ejemplo (Train CSV) para que veas el potencial del simulador al instante.")
         
         try:
-            df_demo = pd.read_csv("train_2.csv") # O train.csv, el que tengas subido en GitHub
+            df_demo = pd.read_csv("train.csv") # O train.csv, el que tengas subido en GitHub
             
             mapeo_columnas_demo = {
                 "ventas": "Sales", "Ventas": "Sales", "monto": "Sales", "Monto": "Sales", 
