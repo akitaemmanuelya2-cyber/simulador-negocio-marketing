@@ -100,20 +100,26 @@ def volver_portada():
     st.session_state['en_simulador'] = False
 
 # ============================================================
-# 🏠 PANTALLA 1: LA PORTADA (LOBBY)
+# 🏠 PANTALLA 1: LA PORTADA (LOBBY - TRUCO 3)
 # ============================================================
 if not st.session_state['en_simulador']:
-    st.title("📊 Simulador de Negocio y Marketing")
-    st.markdown("### Bienvenido a tu Centro de Mando Estratégico")
-    st.write(
-        "Antes de arriesgar tu capital en el mundo real, simula tus decisiones aquí. "
-        "Audita tu inventario, ajusta tus precios, controla tus costos y planifica "
-        "tu inversión publicitaria como un verdadero analista de datos."
-    )
+    # Contenedor central con estilo de bienvenida ejecutivo
+    st.markdown("<h1 style='text-align: center; color: #FAFAFA;'>📊 Simulador de Negocio y Marketing</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #CF9D7B; font-size: 1.2rem; font-weight: bold;'>CENTRO DE MANDO Y DECISIONES ESTRATÉGICAS</p>", unsafe_allow_html=True)
+    
+    st.write("") # Espaciado elegante
+    
+    col_desc1, col_desc2, col_desc3 = st.columns([1, 3, 1])
+    with col_desc2:
+        st.write(
+            "Bienvenido, Emmanuel. Antes de arriesgar tu capital en el mundo real, simula tus decisiones aquí. "
+            "Audita tu inventario, ajusta tus precios, controla tus costos y planifica tu inversión publicitaria "
+            "con precisión de analista de datos."
+        )
 
-    st.divider()
+    st.markdown("<hr style='border: 1px solid #162127;'>", unsafe_allow_html=True)
 
-    st.markdown("#### 🚀 ¿Qué puedes hacer en esta plataforma?")
+    st.markdown("#### 🚀 Selecciona tu módulo de trabajo:")
 
     col_p1, col_p2, col_p3 = st.columns(3)
 
@@ -129,7 +135,7 @@ if not st.session_state['en_simulador']:
 
     st.divider()
     
-    st.markdown("<h3 style='text-align: center;'>¿Listo para tomar el control?</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: #CF9D7B;'>¿Listo para tomar el control?</h3>", unsafe_allow_html=True)
     st.write("") 
     
     col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
