@@ -10,6 +10,40 @@ st.set_page_config(
 )
 
 # ============================================================
+# 🎨 INYECCIÓN DE CSS (DISEÑO PREMIUM Y LIMPIEZA)
+# ============================================================
+estilos_css = """
+<style>
+    /* 1. Ocultar los elementos predeterminados de Streamlit para que parezca app propia */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    
+    /* 2. Personalizar los botones principales con esquinas redondeadas */
+    div.stButton > button {
+        border-radius: 8px;
+        font-weight: bold;
+        border: 1px solid #CF9D7B;
+        transition: all 0.3s ease;
+    }
+    
+    /* 3. Efecto de luz (hover) al pasar el cursor sobre los botones */
+    div.stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0px 6px 15px rgba(207, 157, 123, 0.3);
+        border-color: #FAFAFA;
+    }
+    
+    /* 4. Estilizar las tarjetas o contenedores para que combinen con la paleta */
+    div.stMarkdown {
+        letter-spacing: 0.2px;
+    }
+</style>
+"""
+
+st.markdown(estilos_css, unsafe_allow_html=True)
+
+# ============================================================
 # FUNCIONES DEL MODELO
 # ============================================================
 
