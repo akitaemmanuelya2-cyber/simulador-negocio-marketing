@@ -140,7 +140,7 @@ else:
         st.write("Hemos cargado una base de datos de ejemplo (Train CSV) para que veas el potencial al instante.")
         
         try:
-            df_demo = pd.read_csv("train_2.csv") 
+            df_demo = pd.read_csv("train.csv") 
             
             mapeo_columnas_demo = {
                 "ventas": "Sales", "Ventas": "Sales", "monto": "Sales", "Monto": "Sales", 
@@ -266,7 +266,7 @@ else:
                 st.error(f"Error al simular: {error}")
 
         except FileNotFoundError:
-            st.error("⚠️ Sube 'train_2.csv' a GitHub para usar la demo.")
+            st.error("⚠️ Sube 'train.csv' a GitHub para usar la demo.")
 
     # ========================================================
     # SECCIÓN 2: MODO ASISTIDO
